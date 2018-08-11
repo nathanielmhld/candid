@@ -3,7 +3,9 @@ import {View, Text, StyleSheet, CameraRoll, AsyncStorage, TouchableOpacity, Imag
 import {Camera, Permissions, GestureHandler, Location} from 'expo'
 import {Container, Content, Header, Item, Icon, Input, Button } from "native-base"
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons"
-import { RNS3 } from 'react-native-aws3';
+//import { RNS3 } from 'react-native-aws3';
+
+import { Storage } from 'aws-amplify';
 
 
 const styles = StyleSheet.create({
@@ -47,8 +49,16 @@ class MediaComponent extends Component{
     	var latitude = location.coords.latitude;
     	var longitude = location.coords.longitude;
     	var current = new Date().toLocaleString();
-    	let url = 'https://rocky-anchorage-68937.herokuapp.com/similar/' + userId + '/' + latitude + '/' + longitude + '/' + 'time';
-    	console.log(url);
+
+      let name = 'image62084022.jpg';
+      const access = { level: "public" };
+      let fileUrl = await Storage.get(name, access);
+      console.log(fileUrl)
+      this.setState({displayphotos: this.state.displayphotos.concat(fileUrl)});
+
+
+    	//let url = 'https://rocky-anchorage-68937.herokuapp.com/similar/' + userId + '/' + latitude + '/' + longitude + '/' + 'time';
+    	/*console.log(url);
        var g = fetch(url, {
        method: 'GET',
        headers: {
@@ -67,7 +77,7 @@ class MediaComponent extends Component{
     }).catch((error) => {
       console.error(error);
     });
-
+    */
 
 
     	console.log(latitude + " , " + longitude);
@@ -100,7 +110,7 @@ class MediaComponent extends Component{
 			<View style={{flex:1}}>
 				<ImageBackground style={{flex: 1, flexDirection: 'row'}}
 
-				source={this.state.displayphotos[this.state.displayindex]} alt="Image of you!">
+				source={{ uri: this.state.displayphotos[this.state.displayindex]}} alt="Image of you!">
 
 				<TouchableOpacity style={{width: "30%", height: "100%",  opacity: 0, backgroundColor: '#FFFFFF'}} onPress={e => this.scrollBack(e)}>
 

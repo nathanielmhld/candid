@@ -1,11 +1,14 @@
 import React, { Component } from "react";
 import {View, Text, StyleSheet, TouchableOpacity, CameraRoll, AsyncStorage} from "react-native";
-import {Camera, Permissions, GestureHandler, Location} from 'expo'
+import {Camera, Permissions, GestureHandler, Location, ImagePicker} from 'expo'
 import {Container, Content, Header, Item, Icon, Input, Button } from "native-base"
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons"
-import Amplify, { API } from 'aws-amplify';
+import Amplify, { API, Storage } from 'aws-amplify';
 import aws_exports from './../aws-exports';
 import { RNS3 } from 'react-native-aws3';
+
+//import RNFetchBlob from 'react-native-fetch-blob';
+
 
 const options = {
   keyPrefix: "media/",
@@ -60,8 +63,11 @@ class CameraComponent extends Component{
     var image_file_name = "image" + random + ".jpg";
 
     console.log("Took a picture: " + photo["uri"]);
-    
-
+    console.log("Took a picture: " + image_file_name);
+   
+    function readFile(filePath) {
+    	return RNFetchBlob.fs.readFile(filePath, 'base64').then(data => new Buffer(data, 'base64'));
+  	}
     //New
     let newNote = {
       body: {
@@ -73,20 +79,29 @@ class CameraComponent extends Component{
   	"uid": userId
 	}
     }
-    const path = "/Media";
+    const path = "/media";
 
     // Use the API module to save the note to the database
     try {
       const apiResponse = await API.put("mediaCRUD", path, newNote)
-      console.log("response from saving note: " + apiResponse);
+      console.log("response from saving note: ");
+      console.log(apiResponse);
       this.setState({apiResponse});
     } catch (e) {
       console.log('WTF');
       console.log(e);
     }
 
-    //Old
+    const options = { level: 'public', contentType: 'image/jpeg' };
+    fetch(photo["uri"]).then(response => {
+    	response.blob().then(blob => {
+    		Storage.put(image_file_name, blob, options);
+    	})
+    });
 
+
+    //Old
+    /*
     const file = {
 	  // `uri` can also be a file system path (i.e. file://)
 	  uri: photo["uri"],
@@ -108,10 +123,10 @@ class CameraComponent extends Component{
     })
     .catch((error) => {
       console.error(error);
-    });
+    });*/
 
     CameraRoll.saveToCameraRoll(photo["uri"]);
-
+    /*
     fetch('https://rocky-anchorage-68937.herokuapp.com/image', {
        method: 'POST',
        headers: {
@@ -123,7 +138,7 @@ class CameraComponent extends Component{
         'uid' : userId,
         'default_image': false
     }),
-    });
+    });*/
 	}
 };
 
