@@ -1,0 +1,66 @@
+--- !com.amazonaws.mobilehub.v0.Project 
+apps:
+  react-native: !com.amazonaws.mobilehub.v0.AppDO {}
+features:
+  cloudlogic: !com.amazonaws.mobilehub.v0.CloudLogic 
+    components:
+      mediaCRUD: !com.amazonaws.mobilehub.v0.API 
+        attributes:
+          name: mediaCRUD
+          requires-signin: false
+          sdk-generation-stage-name: Development
+        paths:
+          /media: !com.amazonaws.mobilehub.v0.Function 
+            codeFilename: uploads/media-20180810142248.zip
+            description: 'Handler for calls to resource path : /media/{proxy+}'
+            enableCORS: true
+            environment: {}
+            handler: lambda.handler
+            hashcode: BDGGQQ2B/HNzc32u1jmjG6KD3o2YkoJV4O9n7YYRDk4=
+            memorySize: '128'
+            modified: '2018-08-10T18:23:25.786+0000'
+            name: media
+            runtime: nodejs6.10
+            timeout: '3'
+            version: hqqdrQhxINie4RzSIdxJSZ.G1B_CY5z8
+          '/media/{proxy+}': !com.amazonaws.mobilehub.v0.Function 
+            codeFilename: uploads/media-20180810142248.zip
+            description: 'Handler for calls to resource path : /media/{proxy+}'
+            enableCORS: true
+            environment: {}
+            handler: lambda.handler
+            hashcode: BDGGQQ2B/HNzc32u1jmjG6KD3o2YkoJV4O9n7YYRDk4=
+            memorySize: '128'
+            modified: '2018-08-10T18:23:25.786+0000'
+            name: media
+            runtime: nodejs6.10
+            timeout: '3'
+            version: tPOt1cq6_bmbVxan._aEmdtC2Prdsx.w
+  database: !com.amazonaws.mobilehub.v0.Database 
+    components:
+      database-nosql: !com.amazonaws.mobilehub.v0.NoSQLDatabase 
+        tables:
+          - !com.amazonaws.mobilehub.v0.NoSQLTable 
+            attributes:
+              default_image: BOOL
+              image_uri: S
+              latitude: S
+              longitude: S
+              time: S
+              uid: S
+            hashKeyName: image_uri
+            hashKeyType: S
+            rangeKeyName: uid
+            rangeKeyType: S
+            tableName: ___DYNAMIC_PREFIX___-media
+            tablePrivacy: public
+  mobile-analytics: !com.amazonaws.mobilehub.v0.Pinpoint 
+    components:
+      analytics: !com.amazonaws.mobilehub.v0.PinpointAnalytics {}
+  sign-in: !com.amazonaws.mobilehub.v0.SignIn {}
+  user-files: !com.amazonaws.mobilehub.v0.UserFiles 
+    attributes:
+      enabled: true
+      wildcard-cors-policy: true
+name: Candid
+region: us-east-1

@@ -1,0 +1,6 @@
+{
+	"SourceDir": "/",
+	"DistributionDir": "/",
+	"BuildCommand": "exp start",
+	"StartCommand": "exp start"
+}
