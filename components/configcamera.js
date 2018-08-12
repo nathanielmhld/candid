@@ -4,7 +4,7 @@ import {Camera, Permissions, GestureHandler, Location} from 'expo'
 import {Container, Content, Header, Item, Icon, Input, Button } from "native-base"
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons"
 import { RNS3 } from 'react-native-aws3';
-import { Storage } from 'aws-amplify';
+import Amplify, { API, Storage } from 'aws-amplify';
 
 const options = {
   keyPrefix: "uploads/",
@@ -46,13 +46,48 @@ class ConfigCamera extends Component {
   	console.log("Recorded the location of a photo: " + photo["uri"]);
     //CameraRoll.saveToCameraRoll(photo["uri"]);
     let image_file_name = "image" + userID + ".jpg";
-
+/*
     const file = {
 	  // `uri` can also be a file system path (i.e. file://)
 	  uri: photo["uri"],
 	  name: image_file_name,
 	  type: "image/jpeg"
-	}
+	}*/
+  function readFile(filePath) {
+      return RNFetchBlob.fs.readFile(filePath, 'base64').then(data => new Buffer(data, 'base64'));
+    }
+    //New
+    let newNote = {
+      body: {
+    "default_image": true,
+    "image_uri": image_file_name,
+    "latitude": null,
+    "longitude": null,
+    "time": null,
+    "uid": userID
+  }
+    }
+    const path = "/media";
+
+    // Use the API module to save the note to the database
+    try {
+      const apiResponse = await API.put("mediaCRUD", path, newNote)
+      console.log("response from saving note: ");
+      console.log(apiResponse);
+      this.setState({apiResponse});
+    } catch (e) {
+      console.log('WTF');
+      console.log(e);
+    }
+
+    const options = { level: 'public', contentType: 'image/jpeg' };
+    fetch(photo["uri"]).then(response => {
+      response.blob().then(blob => {
+        Storage.put(image_file_name, blob, options);
+      })
+    });
+
+  /*
 	console.log(options);
     RNS3.put(file, options).then(response => {
     console.log(response);
@@ -80,7 +115,7 @@ class ConfigCamera extends Component {
         'uid' : userID,
         'default_image': true,
       }),
-    });
+    });*/
   }
 };
 

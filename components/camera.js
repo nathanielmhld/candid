@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import {View, Text, StyleSheet, TouchableOpacity, CameraRoll, AsyncStorage} from "react-native";
-import {Camera, Permissions, GestureHandler, Location, ImagePicker} from 'expo'
+import {Camera, Permissions, GestureHandler, Location} from 'expo'
 import {Container, Content, Header, Item, Icon, Input, Button } from "native-base"
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons"
 import Amplify, { API, Storage } from 'aws-amplify';
@@ -55,7 +55,7 @@ class CameraComponent extends Component{
   	let location = await Location.getCurrentPositionAsync({});
     var latitude = location.coords.latitude;
     var longitude = location.coords.longitude;
-    var time = new Date().toLocaleString();
+    var time = new Date().getTime();
     let photo = await this.camera.takePictureAsync();
     let userId = await AsyncStorage.getItem('userID');
 
@@ -73,8 +73,8 @@ class CameraComponent extends Component{
       body: {
   	"default_image": false,
   	"image_uri": image_file_name,
-  	"latitude": String(latitude),
-  	"longitude": String(longitude),
+  	"latitude": latitude,
+  	"longitude": longitude,
   	"time": time,
   	"uid": userId
 	}

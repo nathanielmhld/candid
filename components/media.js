@@ -5,7 +5,8 @@ import {Container, Content, Header, Item, Icon, Input, Button } from "native-bas
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons"
 //import { RNS3 } from 'react-native-aws3';
 
-import { Storage } from 'aws-amplify';
+import { Storage, Auth } from 'aws-amplify';
+import DynamoDB from 'aws-sdk/clients/dynamodb';
 
 
 const styles = StyleSheet.create({
@@ -48,13 +49,45 @@ class MediaComponent extends Component{
     	let userId = await AsyncStorage.getItem('userID');
     	var latitude = location.coords.latitude;
     	var longitude = location.coords.longitude;
-    	var current = new Date().toLocaleString();
+    	var time = new Date().getTime();
 
       let name = 'image62084022.jpg';
       const access = { level: "public" };
       let fileUrl = await Storage.get(name, access);
       console.log(fileUrl)
       this.setState({displayphotos: this.state.displayphotos.concat(fileUrl)});
+
+      var params = {
+        ExpressionAttributeValues: {
+            ':ulong': {N: String(.05+longitude)},
+            ':llong': {N: String(longitude-.05)},
+            ':ulat' : {N: String(.05+latitude)},
+            ':llat' : {N: String(latitude-.05)},
+            ':time' : {N: String(time - 3600000)}},
+        KeyConditionExpression: 'Season = :s and Episode > :e',
+        ProjectionExpression: 'Title, Subtitle',
+      FilterExpression: 'contains (Subtitle, :topic)',
+        TableName: 'EPISODES_TABLE'
+          };
+
+
+      Auth.currentCredentials().then(credentials => {
+      const db= new DynamoDB.DocumentClient({
+      credentials: Auth.essentialCredentials(credentials)
+      });
+      db.query(params, function(err, data) {
+      if (err) {
+    console.log("Unable to query. Error:", JSON.stringify(err, null, 2));
+      } else {
+      console.log("Query succeeded.");
+      data.Items.forEach(function(details) {
+        console.log(details.hub_id,details.sensor_name);
+      });}
+      // now you can run queries with dynamo and current scoped credentials i.e. db.query(...)
+    });
+    })
+
+        
 
 
     	//let url = 'https://rocky-anchorage-68937.herokuapp.com/similar/' + userId + '/' + latitude + '/' + longitude + '/' + 'time';
