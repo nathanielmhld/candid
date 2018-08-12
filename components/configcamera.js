@@ -63,7 +63,7 @@ class ConfigCamera extends Component {
     "image_uri": image_file_name,
     "latitude": null,
     "longitude": null,
-    "time": null,
+    "post_time": null,
     "uid": userID
   }
     }

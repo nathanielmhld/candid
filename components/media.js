@@ -59,22 +59,21 @@ class MediaComponent extends Component{
 
       var params = {
         ExpressionAttributeValues: {
-            ':ulong': {N: String(.05+longitude)},
-            ':llong': {N: String(longitude-.05)},
-            ':ulat' : {N: String(.05+latitude)},
-            ':llat' : {N: String(latitude-.05)},
-            ':time' : {N: String(time - 3600000)}},
-        KeyConditionExpression: 'Season = :s and Episode > :e',
-        ProjectionExpression: 'Title, Subtitle',
-      FilterExpression: 'contains (Subtitle, :topic)',
-        TableName: 'EPISODES_TABLE'
+            //':ulong': .05+longitude,
+            //':llong': longitude-.05,
+            ':ulat' : .05 + latitude
+            //':llat' : latitude-.05,
+            //':tim' : time - 3600000
+          },
+        KeyConditionExpression: 'latitude < :ulat',
+        TableName: 'candidmedia'
           };
 
 
-      Auth.currentCredentials().then(credentials => {
-      const db= new DynamoDB.DocumentClient({
-      credentials: Auth.essentialCredentials(credentials)
-      });
+      //Auth.currentCredentials().then(credentials => {
+      const db= new DynamoDB.DocumentClient();//{
+      //credentials: Auth.essentialCredentials(credentials)
+      //});
       db.query(params, function(err, data) {
       if (err) {
     console.log("Unable to query. Error:", JSON.stringify(err, null, 2));
@@ -85,10 +84,7 @@ class MediaComponent extends Component{
       });}
       // now you can run queries with dynamo and current scoped credentials i.e. db.query(...)
     });
-    })
-
-        
-
+    //})  
 
     	//let url = 'https://rocky-anchorage-68937.herokuapp.com/similar/' + userId + '/' + latitude + '/' + longitude + '/' + 'time';
     	/*console.log(url);

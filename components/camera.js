@@ -75,7 +75,7 @@ class CameraComponent extends Component{
   	"image_uri": image_file_name,
   	"latitude": latitude,
   	"longitude": longitude,
-  	"time": time,
+  	"post_time": time,
   	"uid": userId
 	}
     }
