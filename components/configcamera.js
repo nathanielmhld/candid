@@ -39,14 +39,13 @@ class ConfigCamera extends Component {
     try {
         await AsyncStorage.setItem('userID', userID);
         this.props.method()
-
   	} catch (error) {
   		console.log("Error using storage");
   	}
   	console.log("Recorded the location of a photo: " + photo["uri"]);
     //CameraRoll.saveToCameraRoll(photo["uri"]);
     let image_file_name = "image" + userID + ".jpg";
-/*
+  /*
     const file = {
 	  // `uri` can also be a file system path (i.e. file://)
 	  uri: photo["uri"],
@@ -59,13 +58,13 @@ class ConfigCamera extends Component {
     //New
     let newNote = {
       body: {
-    "default_image": true,
-    "image_uri": image_file_name,
-    "latitude": null,
-    "longitude": null,
-    "post_time": null,
-    "uid": userID
-  }
+        "default_image": true,
+        "image_uri": image_file_name,
+        "latitude": null,
+        "longitude": null,
+        "post_time": null,
+        "uid": userID
+      }
     }
     const path = "/media";
 
@@ -76,7 +75,7 @@ class ConfigCamera extends Component {
       console.log(apiResponse);
       this.setState({apiResponse});
     } catch (e) {
-      console.log('WTF');
+      console.log('somehow this is called');
       console.log(e);
     }
 

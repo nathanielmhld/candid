@@ -2,25 +2,10 @@ import React, { Component } from "react";
 import {View, Text, StyleSheet, TouchableOpacity, CameraRoll, AsyncStorage} from "react-native";
 import {Camera, Permissions, GestureHandler, Location} from 'expo'
 import {Container, Content, Header, Item, Icon, Input, Button } from "native-base"
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons"
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Amplify, { API, Storage } from 'aws-amplify';
 import aws_exports from './../aws-exports';
 import { RNS3 } from 'react-native-aws3';
-
-//import RNFetchBlob from 'react-native-fetch-blob';
-
-
-const options = {
-  keyPrefix: "media/",
-  bucket: "media",
-  region: "us-east-1",
-  accessKey: "AKIAJLAQBY76ZNJM2I7Q",
-  secretKey: "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",
-  successActionStatus: 201,
-  contentType: "image/jpeg"
-}
-
-
 
 class CameraComponent extends Component{
 	constructor(props) {
@@ -33,25 +18,24 @@ class CameraComponent extends Component{
 		type: Camera.Constants.Type.back,
 		apiResponse: null,
   		noteId: ''
-     	};
+  };
 
-  	handleChangeNoteId = (event) => {
-        this.setState({noteId: event});
+  handleChangeNoteId = (event) => {
+    this.setState({noteId: event});
 	};
-
-	
 
 	async componentWillMount(){
 		a = await Permissions.askAsync(Permissions.CAMERA);
 		b = await Permissions.askAsync(Permissions.CAMERA_ROLL);
-    	c = await Permissions.askAsync(Permissions.LOCATION);
-    	if(a && b && c)
+    c = await Permissions.askAsync(Permissions.LOCATION);
+    if(a && b && c)
 		  this.setState({Permission: true});
 	}
 
-
 	snap = async () => {
+  console.log('snapping a picture!');
   if (this.camera) {
+    console.log('inside the camera');
   	let location = await Location.getCurrentPositionAsync({});
     var latitude = location.coords.latitude;
     var longitude = location.coords.longitude;
@@ -59,38 +43,37 @@ class CameraComponent extends Component{
     let photo = await this.camera.takePictureAsync();
     let userId = await AsyncStorage.getItem('userID');
 
+    console.log("inside the camera part 1");
     var random = Math.floor(Math.random() * 100000000)
     var image_file_name = "image" + random + ".jpg";
 
-    console.log("Took a picture: " + photo["uri"]);
-    console.log("Took a picture: " + image_file_name);
-   
-    function readFile(filePath) {
-    	return RNFetchBlob.fs.readFile(filePath, 'base64').then(data => new Buffer(data, 'base64'));
-  	}
     //New
     let newNote = {
       body: {
-  	"default_image": false,
-  	"image_uri": image_file_name,
-  	"latitude": latitude,
-  	"longitude": longitude,
-  	"post_time": time,
-  	"uid": userId
-	}
+  	   "default_image": false,
+  	   "image_uri": image_file_name,
+  	   "latitude": latitude,
+  	   "longitude": longitude,
+  	   "post_time": time,
+  	   "uid": userId
+	    }
     }
-    const path = "/media";
 
-    // Use the API module to save the note to the database
-    try {
+    console.log("inside the camera part 2");
+    const path = "/media";
+    try
+    {
       const apiResponse = await API.put("mediaCRUD", path, newNote)
       console.log("response from saving note: ");
       console.log(apiResponse);
+      console.log('this is working')
       this.setState({apiResponse});
-    } catch (e) {
-      console.log('WTF');
-      console.log(e);
-    }
+   } catch(e) {
+      console.log('error in here!')
+      console.log(e)
+   }
+    // Use the API module to save the note to the database
+
 
     const options = { level: 'public', contentType: 'image/jpeg' };
     fetch(photo["uri"]).then(response => {

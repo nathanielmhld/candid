@@ -8,6 +8,8 @@ import CameraComponent from './components/camera';
 
 import ConfigCamera from './components/configcamera';
 import MediaComponent from './components/media';
+import SignUpProcess from './components/signup'
+import SignInProcess from './components/signin'
 import Amplify, { API } from 'aws-amplify';
 
 import aws_exports from './aws-exports';
@@ -40,15 +42,28 @@ export default class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      userID: -1
+      userID: -1,
+      isLoggedIn: false,
+      signUp: false
     }
     global.userIDset = false;
     this.configure = this.configure.bind(this);
     this.reconfigure = this.reconfigure.bind(this);
+    this.authenticate = this.authenticate.bind(this);
+    this.needToSignUp = this.needToSignUp.bind(this);
+
     Amplify.configure(aws_exports);
-
-
   }
+  authenticate(isAuthenticated) {
+    console.log('setting authentication to true');
+    this.setState({ isLoggedIn: isAuthenticated})
+  }
+
+  needToSignUp(signUp) {
+    console.log('we need to sign up');
+    this.setState({ signUp: signUp});
+  }
+
   async componentDidMount(){
     const value = await AsyncStorage.getItem('userID');
     this.setState({userID: value})
@@ -69,6 +84,19 @@ export default class App extends React.Component {
 
   }
   render() {
+    if(this.state.signUp) {
+      console.log('signup is true');
+      return (
+        <SignUpProcess signUpAuth={this.needToSignUp}> </SignUpProcess>
+      )
+    }
+    if(!this.state.isLoggedIn) {
+      console.log('not logged in is true');
+      return (
+        <SignInProcess signInAuth={this.authenticate} signUpAuth={this.needToSignUp}> </SignInProcess>
+      )
+    }
+
     const {userID} = this.state
     console.log("userID:" + userID);
     if(userID > 0 || global.userIDset){

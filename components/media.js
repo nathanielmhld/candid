@@ -2,7 +2,8 @@ import React, { Component } from "react";
 import {View, Text, StyleSheet, CameraRoll, AsyncStorage, TouchableOpacity, ImageBackground, Image} from "react-native";
 import {Camera, Permissions, GestureHandler, Location} from 'expo'
 import {Container, Content, Header, Item, Icon, Input, Button } from "native-base"
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons"
+
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 //import { RNS3 } from 'react-native-aws3';
 
 import { Storage, Auth } from 'aws-amplify';
@@ -54,7 +55,6 @@ class MediaComponent extends Component{
       let name = 'image62084022.jpg';
       const access = { level: "public" };
       let fileUrl = await Storage.get(name, access);
-      console.log(fileUrl)
       this.setState({displayphotos: this.state.displayphotos.concat(fileUrl)});
 
       var params = {
@@ -74,6 +74,8 @@ class MediaComponent extends Component{
       const db= new DynamoDB.DocumentClient();//{
       //credentials: Auth.essentialCredentials(credentials)
       //});
+      //DATABASE QUERY :::
+      /*
       db.query(params, function(err, data) {
       if (err) {
     console.log("Unable to query. Error:", JSON.stringify(err, null, 2));
@@ -83,8 +85,9 @@ class MediaComponent extends Component{
         console.log(details.hub_id,details.sensor_name);
       });}
       // now you can run queries with dynamo and current scoped credentials i.e. db.query(...)
-    });
-    //})  
+    });*/
+
+    //})
 
     	//let url = 'https://rocky-anchorage-68937.herokuapp.com/similar/' + userId + '/' + latitude + '/' + longitude + '/' + 'time';
     	/*console.log(url);
