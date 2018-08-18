@@ -81,7 +81,6 @@ export default class App extends React.Component {
     global.userIDset = true;
     const value = await AsyncStorage.getItem('userID');
     this.setState({userID: value});
-    console.log("WOWOWOWOW");
 
   }
   render() {

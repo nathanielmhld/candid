@@ -25,7 +25,7 @@ export default class SignInProcess extends React.Component {
       this.setState({'user': user});
       this.props.signInAuth(true);
     })
-    .catch(err => this.setState({issue: err}))
+    .catch(err => this.setState({issue: err['message']}))
   }
   signUpNow() {
     this.props.signUpAuth(true);
