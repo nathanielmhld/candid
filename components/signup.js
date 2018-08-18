@@ -115,10 +115,13 @@ const styles = StyleSheet.create({
     //fontWeight: 'bold',
     textAlign: 'center',
     paddingTop: 10,
+<<<<<<< HEAD
   },
   issue: {
     color: 'red',
     fontSize: 15,
     textAlign: 'center',
+=======
+>>>>>>> 83ae0b8... New fonts but still a bug on the error reporting
   }
 });

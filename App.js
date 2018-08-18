@@ -14,6 +14,7 @@ import Amplify, { API } from 'aws-amplify';
 
 import aws_exports from './aws-exports';
 
+
 const styles = StyleSheet.create({
   slideDefault:{
     flex: 1,

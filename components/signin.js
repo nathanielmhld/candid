@@ -2,6 +2,7 @@ import React from 'react';
 import { TextInput, Button, StyleSheet, Text, View, AsyncStorage } from 'react-native';
 import Amplify, { API, Storage } from 'aws-amplify';
 import {Auth } from 'aws-amplify';
+import {Font} from 'expo';
 
 export default class SignInProcess extends React.Component {
   state = {
@@ -49,6 +50,11 @@ export default class SignInProcess extends React.Component {
   render() {
     return (
       <View style={styles.container}>
+      
+      {this.state.fontLoaded ? (
+      <Text style={styles.text}>Candid</Text>) : null}
+      {this.state.issue ? (
+      <Text style={styles.issue}>{this.state.issue}</Text>) : null}
         <TextInput
           onChangeText={value => this.onChangeText('username', value)}
           style={styles.input}
@@ -89,4 +95,17 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     justifyContent: 'center',
   },
+  text: {
+    color: 'black',
+    fontSize: 50,
+    fontFamily: 'custom-font',
+    //fontWeight: 'bold',
+    textAlign: 'center',
+    paddingTop: 10,
+  },
+  issue: {
+    color: 'red',
+    fontSize: 15,
+    textAlign: 'center',
+  }
 });
