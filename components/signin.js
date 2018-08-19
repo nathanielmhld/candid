@@ -2,16 +2,13 @@ import React from 'react';
 import { TextInput, Button, StyleSheet, Text, View } from 'react-native';
 import Amplify, { API, Storage } from 'aws-amplify';
 import {Auth } from 'aws-amplify';
-import {Font} from 'expo';
 
 export default class SignInProcess extends React.Component {
   state = {
     username: '',
     password: '',
     email: '',
-    user: {},
-    fontLoaded: false,
-    issue: null
+    user: {}
   }
   onChangeText(key, value) {
     this.setState({
@@ -25,16 +22,10 @@ export default class SignInProcess extends React.Component {
       this.setState({'user': user});
       this.props.signInAuth(true);
     })
-    .catch(err => this.setState({issue: err}))
+    .catch(err => console.log(err))
   }
   signUpNow() {
     this.props.signUpAuth(true);
-  }
-  componentDidMount() {
-    Font.loadAsync({
-      'custom-font': require('./../assets/fonts/Molluca.ttf'),
-    }).then(response => {this.setState({ fontLoaded: true });});
-    
   }
 
   //For MFA
@@ -48,11 +39,6 @@ export default class SignInProcess extends React.Component {
   render() {
     return (
       <View style={styles.container}>
-      
-      {this.state.fontLoaded ? (
-      <Text style={styles.text}>Candid</Text>) : null}
-      {this.state.issue ? (
-      <Text style={styles.issue}>{this.state.issue}</Text>) : null}
         <TextInput
           onChangeText={value => this.onChangeText('username', value)}
           style={styles.input}
@@ -93,17 +79,4 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     justifyContent: 'center',
   },
-  text: {
-    color: 'black',
-    fontSize: 50,
-    fontFamily: 'custom-font',
-    //fontWeight: 'bold',
-    textAlign: 'center',
-    paddingTop: 10,
-  },
-  issue: {
-    color: 'red',
-    fontSize: 15,
-    textAlign: 'center',
-  }
 });

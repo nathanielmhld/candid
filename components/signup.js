@@ -11,11 +11,6 @@ export default class SignUpProcess extends React.Component {
     email: '',
     email_code: ''
   }
-  componentDidMount() {
-    Font.loadAsync({
-      'custom-font': require('./../assets/fonts/Molluca.ttf'),
-    });
-  }
   onChangeText(key, value) {
     this.setState({
       [key]: value
@@ -48,7 +43,6 @@ export default class SignUpProcess extends React.Component {
   render() {
     return (
       <View style={styles.container}>
-      <Text style={styles.text}>Candid</Text>
         <TextInput
           onChangeText={value => this.onChangeText('username', value)}
           style={styles.input}
@@ -89,18 +83,4 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     justifyContent: 'center',
   },
-  slideDefault: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#9DD6EB'
-  },
-  text: {
-    color: 'black',
-    fontSize: 56,
-    fontFamily: 'custom-font',
-    //fontWeight: 'bold',
-    textAlign: 'center',
-    paddingTop: 10,
-  }
 });
