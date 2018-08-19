@@ -52,6 +52,8 @@ export default class App extends React.Component {
     this.reconfigure = this.reconfigure.bind(this);
     this.authenticate = this.authenticate.bind(this);
     this.needToSignUp = this.needToSignUp.bind(this);
+    this.signOut = this.signOut.bind(this);
+
 
     Amplify.configure(aws_exports);
   }
@@ -65,10 +67,20 @@ export default class App extends React.Component {
     this.setState({ signUp: signUp});
   }
 
+  async signOut() {
+    AsyncStorage.removeItem('user');
+    this.setState({isLoggedIn: false});
+    console.log("sign out");
+  }
+
   async componentDidMount(){
-    const value = await AsyncStorage.getItem('userID');
-    this.setState({userID: value})
-    console.log(value)
+    let value = await AsyncStorage.getItem('userID');
+    this.setState({userID: value});
+    console.log(value);
+    value = await AsyncStorage.getItem('user');
+    if (value){
+      this.setState({isLoggedIn: true});
+    }
   }
 
   async reconfigure(){
@@ -118,7 +130,7 @@ export default class App extends React.Component {
 
       return (
       <View style={{flex: 1}}>
-          <ConfigCamera method={this.configure}>
+          <ConfigCamera method={this.configure} signout={this.signOut}>
           </ConfigCamera>
         </View>
         );

@@ -40,7 +40,7 @@ class MediaComponent extends Component{
     this.checkServer = this.checkServer.bind(this);
     }
 
-    async componentWillMount() {
+    async componentDidMount() {
     var intervalID = window.setInterval(this.checkServer, 10000);
   	}
 

@@ -5,14 +5,7 @@ import {Auth } from 'aws-amplify';
 import {Font} from 'expo';
 
 export default class SignUpProcess extends React.Component {
-  state = {
-    username: '',
-    password: '',
-    email: '',
-    email_code: '',
-    issue: null,
-    fontLoaded: false
-  }
+  state = {}
 
   backToSignIn(){
     this.props.signUpAuth(false);
@@ -21,6 +14,14 @@ export default class SignUpProcess extends React.Component {
     Font.loadAsync({
       'custom-font': require('./../assets/fonts/Molluca.ttf'),
     }).then(response => {this.setState({ fontLoaded: true });});
+     this.state = {
+    username: '',
+    password: '',
+    email: '',
+    email_code: '',
+    issue: null,
+    fontLoaded: false
+  }
     }
   onChangeText(key, value) {
     this.setState({

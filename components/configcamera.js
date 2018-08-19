@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import {View, Text, StyleSheet, TouchableOpacity, CameraRoll, AsyncStorage} from "react-native";
 import {Camera, Permissions, GestureHandler, Location} from 'expo'
 import {Container, Content, Header, Item, Icon, Input, Button } from "native-base"
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons"
+import { MaterialCommunityIcons, Octicons } from '@expo/vector-icons';
 import { RNS3 } from 'react-native-aws3';
 import Amplify, { API, Storage } from 'aws-amplify';
 
@@ -19,17 +19,20 @@ const options = {
 class ConfigCamera extends Component {
 
 	state = {
-		Permission: null,
-		type: Camera.Constants.Type.front
-
 	}
 
-	async componentDidMount(){
+	async componentWillMount(){
 		a = await Permissions.askAsync(Permissions.CAMERA);
 		b = await Permissions.askAsync(Permissions.CAMERA_ROLL);
     c = await Permissions.askAsync(Permissions.LOCATION);
     if(a && b && c)
 		  this.setState({Permission: true});
+
+    this.state = {
+    Permission: null,
+    type: Camera.Constants.Type.front
+
+  }
 	}
 	snap = async () => {
   if (this.camera) {

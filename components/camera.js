@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import {View, Text, StyleSheet, TouchableOpacity, CameraRoll, AsyncStorage} from "react-native";
 import {Camera, Permissions, GestureHandler, Location} from 'expo'
 import {Container, Content, Header, Item, Icon, Input, Button } from "native-base"
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons, Octicons } from '@expo/vector-icons';
 import Amplify, { API, Storage } from 'aws-amplify';
 import aws_exports from './../aws-exports';
 import { RNS3 } from 'react-native-aws3';
@@ -13,23 +13,24 @@ class CameraComponent extends Component{
     Amplify.configure(aws_exports);
   };
 
-	state = {
-		Permission: null,
-		type: Camera.Constants.Type.back,
-		apiResponse: null,
-  		noteId: ''
-  };
+	state = {};
 
   handleChangeNoteId = (event) => {
     this.setState({noteId: event});
 	};
 
-	async componentWillMount(){
+	async componentDidMount(){
 		a = await Permissions.askAsync(Permissions.CAMERA);
 		b = await Permissions.askAsync(Permissions.CAMERA_ROLL);
     c = await Permissions.askAsync(Permissions.LOCATION);
     if(a && b && c)
 		  this.setState({Permission: true});
+    this.state = {
+    Permission: null,
+    type: Camera.Constants.Type.back,
+    apiResponse: null,
+      noteId: ''
+  };
 	}
 
 	snap = async () => {
@@ -141,9 +142,12 @@ class CameraComponent extends Component{
 			<View style={{flex:1}}>
 				<Camera style={{flex:1}} type={this.state.type} ref={ref => { this.camera = ref; }}>
 				<View style={{position: 'absolute', left: 0, top: 15}}>
-					<TouchableOpacity onPress={this.props.method}>
-					<MaterialCommunityIcons name="backup-restore" style={{color:'white', fontSize: 50}}></MaterialCommunityIcons>
+					<TouchableOpacity onPress={this.props.signout}>
+					<Octicons name="sign-out" style={{color:'white', fontSize: 50}}></Octicons>
 					</TouchableOpacity>
+          <TouchableOpacity onPress={this.props.method}>
+          <MaterialCommunityIcons name="backup-restore" style={{color:'white', fontSize: 50}}></MaterialCommunityIcons>
+          </TouchableOpacity>
 				</View>
 
 				<View style={{position: 'absolute', left: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center'}}>
