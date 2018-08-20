@@ -42,45 +42,37 @@ class ConfigCamera extends Component {
   	console.log("Recorded the location of a photo: " + photo["uri"]);
     //CameraRoll.saveToCameraRoll(photo["uri"]);
     let image_file_name = "image" + String(Math.floor(Math.random() * 1000)) + ".jpg";
-  /*
-    const file = {
-	  // `uri` can also be a file system path (i.e. file://)
-	  uri: photo["uri"],
-	  name: image_file_name,
-	  type: "image/jpeg"
-	}*/
-  function readFile(filePath) {
-      return RNFetchBlob.fs.readFile(filePath, 'base64').then(data => new Buffer(data, 'base64'));
-    }
+    user = JSON.parse(await AsyncStorage.getItem("user"));
+    let userId = user["username"];
+
+    // Use the API module to save the note to the database
+    var random = Math.floor(Math.random() * 100000000)
+    var image_file_name = "image" + random + ".jpg";
+
     //New
     let newNote = {
       body: {
-        "default_image": true,
-        "image_uri": image_file_name,
-        "latitude": null,
-        "longitude": null,
-        "post_time": null
-      }
+       "image_uri": image_file_name,
+       "latitude": 0,
+       "longitude": 0,
+       "post_time": 0,
+       "username": userId,
+       "default_image": false
+     }
     }
-    const path = "/media";
-
-    // Use the API module to save the note to the database
-    try {
-      const apiResponse = await API.put("mediaCRUD", path, newNote)
-      console.log("response from saving note: ");
-      console.log(apiResponse);
-      this.setState({apiResponse});
-    } catch (e) {
-      console.log('somehow this is called');
-      console.log(e);
-    }
+    const path = "/images";
 
     const options = { level: 'public', contentType: 'image/jpeg' };
     fetch(photo["uri"]).then(response => {
       response.blob().then(blob => {
-        Storage.put(image_file_name, blob, options);
+        Storage.put(image_file_name, blob, options).then(() => {
+          API.put("candidImageHandler", path, newNote).then(apiResponse => {
+            console.log(apiResponse);
+            this.setState({apiResponse});
+          })
+        })
       })
-    });
+    })
 
   /*
 	console.log(options);

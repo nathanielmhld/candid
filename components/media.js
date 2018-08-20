@@ -47,13 +47,14 @@ class MediaComponent extends Component{
   	async checkServer(){
     	let location = await Location.getCurrentPositionAsync({});
     	this.setState({location: location});
-    	let userId = await AsyncStorage.getItem('userID');
+    	user = JSON.parse(await AsyncStorage.getItem("user"));
+      let userId = user["username"];
     	var latitude = location.coords.latitude;
     	var longitude = location.coords.longitude;
     	var time = new Date().getTime();
 
-
-      const apiResponse = await API.get("candidImageHandler","/images/nate")
+      console.log(userId);
+      const apiResponse = await API.get("candidImageHandler","/images/" + userId);
       newPics = JSON.parse(apiResponse.slice(apiResponse.indexOf("\"") + 1,apiResponse.lastIndexOf("\"")).replace(/'/g, "\""));
 
 

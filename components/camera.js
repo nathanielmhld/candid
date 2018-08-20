@@ -44,7 +44,8 @@ class CameraComponent extends Component{
     var longitude = location.coords.longitude;
     var time = new Date().getTime();
     let photo = await this.camera.takePictureAsync();
-    let userId = await AsyncStorage.getItem('userID');
+    user = JSON.parse(await AsyncStorage.getItem("user"));
+    let userId = user["username"];
 
     console.log("inside the camera part 1");
     var random = Math.floor(Math.random() * 100000000)
@@ -74,54 +75,8 @@ class CameraComponent extends Component{
         })
       })
     })
-
-
-
-    // Use the API module to save the note to the database
-
-
-
-
-
-    //Old
-    /*
-    const file = {
-	  // `uri` can also be a file system path (i.e. file://)
-	  uri: photo["uri"],
-	  name: image_file_name,
-	  type: "image/jpeg"
-	}
-	console.log(options);
-    RNS3.put(file, options).then(response => {
-    console.log(response);
-    console.log(response.body);
-  	if (response.status !== 201)
-    	throw new Error("Failed to upload image to S3");
-
-
-	})
-      //.then((response) => response.json())
-      .then((response) => {
-      	console.log(response);
-    })
-    .catch((error) => {
-      console.error(error);
-    });*/
-
+    
     CameraRoll.saveToCameraRoll(photo["uri"]);
-    /*
-    fetch('https://rocky-anchorage-68937.herokuapp.com/image', {
-       method: 'POST',
-       headers: {
-       Accept: 'application/json',
-      'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        'image_uri': image_file_name,
-        'uid' : userId,
-        'default_image': false
-    }),
-    });*/
 	}
 };
 
