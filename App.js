@@ -42,15 +42,16 @@ export default class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      userID: -1,
+      hasDefault: false,
       isLoggedIn: false,
       signUp: false
     }
-    global.userIDset = false;
     this.configure = this.configure.bind(this);
     this.reconfigure = this.reconfigure.bind(this);
     this.authenticate = this.authenticate.bind(this);
     this.needToSignUp = this.needToSignUp.bind(this);
+    this.signOut = this.signOut.bind(this);
+
 
     Amplify.configure(aws_exports);
   }
@@ -64,23 +65,30 @@ export default class App extends React.Component {
     this.setState({ signUp: signUp});
   }
 
+  async signOut() {
+    AsyncStorage.removeItem('user');
+    this.setState({isLoggedIn: false});
+    console.log("sign out");
+  }
+
   async componentDidMount(){
-    const value = await AsyncStorage.getItem('userID');
-    this.setState({userID: value})
-    console.log(value)
+    let value = await AsyncStorage.getItem('hasDefault');
+    this.setState({hasDefault: value});
+    console.log(value);
+    value = await AsyncStorage.getItem('user');
+    if (value){
+      this.setState({isLoggedIn: true});
+    }
   }
 
   async reconfigure(){
-    await AsyncStorage.removeItem('userID');
-    global.userIDset = false;
-    this.setState({userID: -1})
+    await AsyncStorage.removeItem('hasDefault');
+    this.setState({hasDefault: false})
 
   }
   async configure(){
-    global.userIDset = true;
-    const value = await AsyncStorage.getItem('userID');
-    this.setState({userID: value});
-    console.log("WOWOWOWOW");
+    const value = await AsyncStorage.getItem('hasDefault');
+    this.setState({hasDefault: value});
 
   }
   render() {
@@ -97,13 +105,12 @@ export default class App extends React.Component {
       )
     }
 
-    const {userID} = this.state
-    console.log("userID:" + userID);
-    if(userID > 0 || global.userIDset){
+    const {hasDefault} = this.state
+    if(hasDefault){
       return (
         <Swiper ref='swiper' loop={false} showsPagination={false} index={0} removeClippedSubviews={true}>
         <View style={{flex: 1}}>
-          <CameraComponent method={this.reconfigure}>
+          <CameraComponent configure={this.reconfigure} signout={this.signOut}>
           </CameraComponent>
         </View>
         <View style={{flex: 1}}>
@@ -118,8 +125,7 @@ export default class App extends React.Component {
 
       return (
       <View style={{flex: 1}}>
-          <ConfigCamera method={this.configure}>
-          </ConfigCamera>
+          <ConfigCamera method={this.configure}> </ConfigCamera>
         </View>
         );
     }

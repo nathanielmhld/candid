@@ -1,14 +1,10 @@
 import React from 'react';
-import { TextInput, Button, StyleSheet, Text, View } from 'react-native';
+import { TextInput, Button, StyleSheet, Text, View, AsyncStorage } from 'react-native';
 import Amplify, { API, Storage } from 'aws-amplify';
 import {Auth } from 'aws-amplify';
 
 export default class SignInProcess extends React.Component {
   state = {
-    username: '',
-    password: '',
-    email: '',
-    user: {}
   }
   onChangeText(key, value) {
     this.setState({
@@ -20,12 +16,26 @@ export default class SignInProcess extends React.Component {
     Auth.signIn(this.state.username, this.state.password)
     .then(user => {
       this.setState({'user': user});
+      AsyncStorage.setItem('user', JSON.stringify(user));
       this.props.signInAuth(true);
     })
-    .catch(err => console.log(err))
+    .catch(err => this.setState({issue: err['message']}))
   }
   signUpNow() {
     this.props.signUpAuth(true);
+  }
+  componentDidMount() {
+    Font.loadAsync({
+      'custom-font': require('./../assets/fonts/Molluca.ttf'),
+    }).then(response => {this.setState({ fontLoaded: true });});
+    this.state = {
+    username: '',
+    password: '',
+    email: '',
+    user: {},
+    fontLoaded: false,
+    issue: null
+  }
   }
 
   //For MFA
