@@ -50,37 +50,34 @@ class CameraComponent extends Component{
     //New
     let newNote = {
       body: {
-  	   "default_image": false,
   	   "image_uri": image_file_name,
   	   "latitude": latitude,
   	   "longitude": longitude,
   	   "post_time": time,
-  	   "uid": userId
-	    }
+       "username": userId,
+       "default_image": false
+     }
     }
-
-    console.log("inside the camera part 2");
-    const path = "/media";
-    try
-    {
-      const apiResponse = await API.put("mediaCRUD", path, newNote)
-      console.log("response from saving note: ");
-      console.log(apiResponse);
-      console.log('this is working')
-      this.setState({apiResponse});
-   } catch(e) {
-      console.log('error in here!')
-      console.log(e)
-   }
-    // Use the API module to save the note to the database
-
+    const path = "/images";
 
     const options = { level: 'public', contentType: 'image/jpeg' };
     fetch(photo["uri"]).then(response => {
-    	response.blob().then(blob => {
-    		Storage.put(image_file_name, blob, options);
-    	})
-    });
+      response.blob().then(blob => {
+        Storage.put(image_file_name, blob, options).then(() => {
+          API.put("candidImageHandler", path, newNote).then(apiResponse => {
+            console.log(apiResponse);
+            this.setState({apiResponse});
+          })
+        })
+      })
+    })
+
+
+
+    // Use the API module to save the note to the database
+
+
+
 
 
     //Old
