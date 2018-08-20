@@ -1,11 +1,11 @@
 import React, { Component } from "react";
 import {View, Text, StyleSheet, TouchableOpacity, CameraRoll, AsyncStorage} from "react-native";
 import {Camera, Permissions, GestureHandler, Location} from 'expo'
-import {Container, Content, Header, Item, Icon, Input, Button } from "native-base"
+import {Container, Button } from "native-base"
 import { MaterialCommunityIcons, Octicons } from '@expo/vector-icons';
 import Amplify, { API, Storage } from 'aws-amplify';
 import aws_exports from './../aws-exports';
-import { RNS3 } from 'react-native-aws3';
+import uniqueId from 'react-native-unique-id';
 
 class CameraComponent extends Component{
 	constructor(props) {
@@ -48,7 +48,8 @@ class CameraComponent extends Component{
     let userId = user["username"];
 
     console.log("inside the camera part 1");
-    var random = Math.floor(Math.random() * 100000000)
+    var random = await uniqueId();
+ 
     var image_file_name = "image" + random + ".jpg";
 
     //New

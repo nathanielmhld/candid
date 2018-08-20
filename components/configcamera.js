@@ -5,6 +5,7 @@ import {Container, Content, Header, Item, Icon, Input, Button } from "native-bas
 import { MaterialCommunityIcons, Octicons } from '@expo/vector-icons';
 import { RNS3 } from 'react-native-aws3';
 import Amplify, { API, Storage } from 'aws-amplify';
+import uniqueId from 'react-native-unique-id';
 
 const options = {
   keyPrefix: "uploads/",
@@ -46,7 +47,7 @@ class ConfigCamera extends Component {
     let userId = user["username"];
 
     // Use the API module to save the note to the database
-    var random = Math.floor(Math.random() * 100000000)
+    var random = await uniqueId();
     var image_file_name = "image" + random + ".jpg";
 
     //New
