@@ -124,7 +124,7 @@ class ConfigCamera extends Component {
 			<View style={{flex:1}}>
 				<Camera style={{flex:1}} type={this.state.type} ref={ref => { this.camera = ref; }}>
 				<View style={{position: 'absolute', left: 0, right: 0, top: 15, alignItems: 'center', justifyContent: 'center'}}>
-					<Text style={{color:'white', fontSize: 40}}>First, we need a selfie!</Text>
+					<Text style={{color:'white', fontSize: 40}}>We need a selfie!</Text>
 				</View>
 				<View style={{position: 'absolute', left: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center'}}>
 					<TouchableOpacity onPress={this.snap}>

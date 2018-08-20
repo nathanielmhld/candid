@@ -50,7 +50,10 @@ class MediaComponent extends Component{
   	async checkServer(){
     	let location = await Location.getCurrentPositionAsync({});
     	this.setState({location: location});
-    	user = JSON.parse(await AsyncStorage.getItem("user"));
+      raw = await AsyncStorage.getItem("user");
+      if(raw === null)
+        return
+    	user = JSON.parse(raw);
       let userId = user["username"];
     	var latitude = location.coords.latitude;
     	var longitude = location.coords.longitude;

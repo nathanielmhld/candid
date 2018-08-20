@@ -45,7 +45,8 @@ export default class App extends React.Component {
     this.state = {
       hasDefault: false,
       isLoggedIn: false,
-      signUp: false
+      signUp: false,
+      loaded: false
     }
     this.configure = this.configure.bind(this);
     this.reconfigure = this.reconfigure.bind(this);
@@ -73,6 +74,7 @@ export default class App extends React.Component {
   }
 
   async componentDidMount(){
+    this.setState({loaded: false});
     let value = await AsyncStorage.getItem('hasDefault');
     this.setState({hasDefault: value});
     console.log(value);
@@ -80,6 +82,7 @@ export default class App extends React.Component {
     if (value){
       this.setState({isLoggedIn: true});
     }
+    this.setState({loaded: true});
   }
 
   async reconfigure(){
@@ -93,6 +96,8 @@ export default class App extends React.Component {
 
   }
   render() {
+    if(!this.state.loaded)
+      return(<View/>);
     if(this.state.signUp) {
       console.log('signup is true');
       return (
