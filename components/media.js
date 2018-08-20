@@ -5,8 +5,9 @@ import {Container, Content, Header, Item, Icon, Input, Button } from "native-bas
 
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-import { Storage, Auth, API } from 'aws-amplify';
+import Amplify, { Storage, Auth, API } from 'aws-amplify';
 import DynamoDB from 'aws-sdk/clients/dynamodb';
+import aws_exports from './../aws-exports';
 
 
 const styles = StyleSheet.create({
@@ -29,10 +30,12 @@ class MediaComponent extends Component{
 
 	constructor(props) {
     super(props);
+    Amplify.configure(aws_exports);
 
     this.state = {
       displayphotos: [],
       storedphotos: [],
+      newPics: [],
       displayphoto: null,
       displayindex: 0,
 	  location: null
@@ -52,33 +55,26 @@ class MediaComponent extends Component{
     	var latitude = location.coords.latitude;
     	var longitude = location.coords.longitude;
     	var time = new Date().getTime();
-
-      console.log(userId);
-      const apiResponse = await API.get("candidImageHandler","/images/" + userId);
-      newPics = JSON.parse(apiResponse.slice(apiResponse.indexOf("\"") + 1,apiResponse.lastIndexOf("\"")).replace(/'/g, "\""));
-
-
+      
+      apiResponse = await API.get("candidImageHandler","/images/" + userId).catch(error => {
+            console.error(error);
+            console.error("Darn");
+          });
+      let newPics = JSON.parse(apiResponse.slice(apiResponse.indexOf("["),apiResponse.lastIndexOf("]") + 1).replace(/'/g, "\""));
       for (i = 0; i < newPics.length; i++) { 
-        if(!this.state.storedphotos.includes(newPics[i])){
-          this.setState({storedphotos: this.state.storedphotos.concat(newPics[i])});
-          let fileUrl = await Storage.get(newPics[i]);
-          let localName = FileSystem.documentDirectory + newPics[i];
-          FileSystem.downloadAsync(fileUrl,localName)
+      if(!this.state.storedphotos.includes(newPics[i])){
+      this.setState({storedphotos: this.state.storedphotos.concat(newPics[i])});
+      fileUrl = await Storage.get(newPics[i]);
+      let localName = FileSystem.documentDirectory + newPics[i];
+      FileSystem.downloadAsync(fileUrl,localName)
           .then(({ uri }) => {
             console.log('Finished downloading to ', uri);
-            this.setState({displayphotos: this.state.displayphotos.concat(uri)});
+            this.setState({displayphotos: this.state.displayphotos.reverse().concat(uri).reverse()});
+
           })
-          .catch(error => {
-            console.error(error);
-          });
-
-
         }
       }
-
-  
-
-
+      
     	console.log(latitude + " , " + longitude);
     }
 

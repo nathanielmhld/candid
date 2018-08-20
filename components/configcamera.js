@@ -57,7 +57,7 @@ class ConfigCamera extends Component {
        "longitude": 0,
        "post_time": 0,
        "username": userId,
-       "default_image": false
+       "default_image": true
      }
     }
     const path = "/images";
