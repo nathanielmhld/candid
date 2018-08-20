@@ -17,6 +17,8 @@ export default class SignInProcess extends React.Component {
     Auth.signIn(this.state.username, this.state.password)
     .then(user => {
       this.setState({'user': user});
+      console.log("clear as day!!!!!")
+      console.log(user);
       AsyncStorage.setItem('user', JSON.stringify(user));
       this.props.signInAuth(true);
     })
@@ -50,7 +52,7 @@ export default class SignInProcess extends React.Component {
   render() {
     return (
       <View style={styles.container}>
-      
+
       {this.state.fontLoaded ? (
       <Text style={styles.text}>Candid</Text>) : null}
       {this.state.issue ? (

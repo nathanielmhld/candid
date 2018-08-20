@@ -53,12 +53,10 @@ class MediaComponent extends Component{
     	var longitude = location.coords.longitude;
     	var time = new Date().getTime();
 
-      console.log(userId);
       const apiResponse = await API.get("candidImageHandler","/images/" + userId);
-      newPics = JSON.parse(apiResponse.slice(apiResponse.indexOf("\"") + 1,apiResponse.lastIndexOf("\"")).replace(/'/g, "\""));
+      newPics = JSON.parse(apiResponse.slice(apiResponse.indexOf("["),apiResponse.lastIndexOf("]") + 1).replace(/'/g, "\""));
 
-
-      for (i = 0; i < newPics.length; i++) { 
+      for (i = 0; i < newPics.length; i++) {
         if(!this.state.storedphotos.includes(newPics[i])){
           this.setState({storedphotos: this.state.storedphotos.concat(newPics[i])});
           let fileUrl = await Storage.get(newPics[i]);
@@ -76,7 +74,7 @@ class MediaComponent extends Component{
         }
       }
 
-  
+
 
 
     	console.log(latitude + " , " + longitude);

@@ -27,7 +27,7 @@ class ConfigCamera extends Component {
     if(a && b && c)
 		  this.setState({Permission: true});
 
-    
+
 	}
 	snap = async () => {
   if (this.camera) {
@@ -57,7 +57,7 @@ class ConfigCamera extends Component {
        "longitude": 0,
        "post_time": 0,
        "username": userId,
-       "default_image": false
+       "default_image": true
      }
     }
     const path = "/images";
@@ -69,6 +69,9 @@ class ConfigCamera extends Component {
           API.put("candidImageHandler", path, newNote).then(apiResponse => {
             console.log(apiResponse);
             this.setState({apiResponse});
+          }).catch(e => {
+            console.log('fatal error in here!')
+            console.log(e);
           })
         })
       })
