@@ -17,11 +17,12 @@ export default class SignInProcess extends React.Component {
     Auth.signIn(this.state.username, this.state.password)
     .then(user => {
       this.setState({'user': user});
+      AsyncStorage.setItem('user', JSON.stringify(user));
+      this.props.signInAuth(true);
     })
     .catch(err => this.setState({issue: err['message']}))
     
-    AsyncStorage.setItem('user', JSON.stringify(this.state.user));
-    this.props.signInAuth(true);
+    
   }
   signUpNow() {
     this.props.signUpAuth(true);

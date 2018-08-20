@@ -1,12 +1,11 @@
 import React, { Component } from "react";
 import {View, Text, StyleSheet, CameraRoll, AsyncStorage, TouchableOpacity, ImageBackground, Image} from "react-native";
-import {Camera, Permissions, GestureHandler, Location} from 'expo'
+import {Camera, Permissions, GestureHandler, Location, FileSystem} from 'expo'
 import {Container, Content, Header, Item, Icon, Input, Button } from "native-base"
 
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-//import { RNS3 } from 'react-native-aws3';
 
-import { Storage, Auth } from 'aws-amplify';
+import { Storage, Auth, API } from 'aws-amplify';
 import DynamoDB from 'aws-sdk/clients/dynamodb';
 
 
@@ -33,6 +32,7 @@ class MediaComponent extends Component{
 
     this.state = {
       displayphotos: [],
+      storedphotos: [],
       displayphoto: null,
       displayindex: 0,
 	  location: null
@@ -52,64 +52,30 @@ class MediaComponent extends Component{
     	var longitude = location.coords.longitude;
     	var time = new Date().getTime();
 
-      let name = 'image62084022.jpg';
-      const access = { level: "public" };
-      let fileUrl = await Storage.get(name, access);
-      this.setState({displayphotos: this.state.displayphotos.concat(fileUrl)});
 
-      var params = {
-        ExpressionAttributeValues: {
-            //':ulong': .05+longitude,
-            //':llong': longitude-.05,
-            ':ulat' : .05 + latitude
-            //':llat' : latitude-.05,
-            //':tim' : time - 3600000
-          },
-        KeyConditionExpression: 'latitude < :ulat',
-        TableName: 'candidmedia'
-          };
+      const apiResponse = await API.get("candidImageHandler","/images/nate")
+      newPics = JSON.parse(apiResponse.slice(apiResponse.indexOf("\"") + 1,apiResponse.lastIndexOf("\"")).replace(/'/g, "\""));
 
 
-      //Auth.currentCredentials().then(credentials => {
-      const db= new DynamoDB.DocumentClient();//{
-      //credentials: Auth.essentialCredentials(credentials)
-      //});
-      //DATABASE QUERY :::
-      /*
-      db.query(params, function(err, data) {
-      if (err) {
-    console.log("Unable to query. Error:", JSON.stringify(err, null, 2));
-      } else {
-      console.log("Query succeeded.");
-      data.Items.forEach(function(details) {
-        console.log(details.hub_id,details.sensor_name);
-      });}
-      // now you can run queries with dynamo and current scoped credentials i.e. db.query(...)
-    });*/
+      for (i = 0; i < newPics.length; i++) { 
+        if(!this.state.storedphotos.includes(newPics[i])){
+          this.setState({storedphotos: this.state.storedphotos.concat(newPics[i])});
+          let fileUrl = await Storage.get(newPics[i]);
+          let localName = FileSystem.documentDirectory + newPics[i];
+          FileSystem.downloadAsync(fileUrl,localName)
+          .then(({ uri }) => {
+            console.log('Finished downloading to ', uri);
+            this.setState({displayphotos: this.state.displayphotos.concat(uri)});
+          })
+          .catch(error => {
+            console.error(error);
+          });
 
-    //})
 
-    	//let url = 'https://rocky-anchorage-68937.herokuapp.com/similar/' + userId + '/' + latitude + '/' + longitude + '/' + 'time';
-    	/*console.log(url);
-       var g = fetch(url, {
-       method: 'GET',
-       headers: {
-       Accept: 'application/json',
-      'Content-Type': 'application/json',
-      },
-      }).then((responseJSON) => responseJSON.json())
-      .then((response) => {
-      	console.log("starting resposne data");
-      	console.log(response);
-      	console.log(response["name"]);
-        if(this.state.displayphotos.indexOf("https://s3.amazonaws.com/mirrormediacontent1/" + response["name"]) == -1){
-      	this.setState({displayphotos: this.state.displayphotos.concat("https://s3.amazonaws.com/mirrormediacontent1/" + response["name"])});
-        console.log("HELLO, photo is: " + "https://s3.amazonaws.com/mirrormediacontent1/" + response["name"]);
+        }
       }
-    }).catch((error) => {
-      console.error(error);
-    });
-    */
+
+  
 
 
     	console.log(latitude + " , " + longitude);

@@ -24,7 +24,13 @@
       "supportsTablet": true
     },
     "splash": {
-  "image": "./assets/splash.png",
+      "ldpi": "./assets/splash.png",
+    "mdpi": "./assets/splash.png",
+    "hdpi": "./assets/splash.png",
+    "xhdpi": "./assets/splash.png",
+    "xxhdpi": "./assets/splash.png",
+    "xxxhdpi": "./assets/splash.png",
+    "resizeMode": "cover",
   "backgroundColor": "#FFFFFF"
   }
   }

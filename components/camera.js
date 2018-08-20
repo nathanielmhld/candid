@@ -13,24 +13,26 @@ class CameraComponent extends Component{
     Amplify.configure(aws_exports);
   };
 
-	state = {};
 
   handleChangeNoteId = (event) => {
     this.setState({noteId: event});
 	};
 
+  state = {};
+
 	async componentDidMount(){
+    this.setState({
+    Permission: null,
+    type: Camera.Constants.Type.back,
+    apiResponse: null,
+      noteId: ''
+  });
 		a = await Permissions.askAsync(Permissions.CAMERA);
 		b = await Permissions.askAsync(Permissions.CAMERA_ROLL);
     c = await Permissions.askAsync(Permissions.LOCATION);
     if(a && b && c)
 		  this.setState({Permission: true});
-    this.state = {
-    Permission: null,
-    type: Camera.Constants.Type.back,
-    apiResponse: null,
-      noteId: ''
-  };
+    
 	}
 
 	snap = async () => {
@@ -126,7 +128,6 @@ class CameraComponent extends Component{
 	}
 };
 
-
 	render(){
 		const {Permission} = this.state
 		if(Permission === null)
@@ -141,11 +142,13 @@ class CameraComponent extends Component{
 
 			<View style={{flex:1}}>
 				<Camera style={{flex:1}} type={this.state.type} ref={ref => { this.camera = ref; }}>
-				<View style={{position: 'absolute', left: 0, top: 15}}>
+				<View style={{position: 'absolute', right: 0, top: 15}}>
 					<TouchableOpacity onPress={this.props.signout}>
 					<Octicons name="sign-out" style={{color:'white', fontSize: 50}}></Octicons>
 					</TouchableOpacity>
-          <TouchableOpacity onPress={this.props.method}>
+          </View>
+          <View style={{position: 'absolute', left: 0, top: 15}}>
+          <TouchableOpacity onPress={this.props.configure}>
           <MaterialCommunityIcons name="backup-restore" style={{color:'white', fontSize: 50}}></MaterialCommunityIcons>
           </TouchableOpacity>
 				</View>

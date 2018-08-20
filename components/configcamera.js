@@ -17,37 +17,31 @@ const options = {
 }
 
 class ConfigCamera extends Component {
+  state = {}
 
-	state = {
-	}
-
-	async componentWillMount(){
+	async componentDidMount(){
+    this.setState({type: Camera.Constants.Type.front});
 		a = await Permissions.askAsync(Permissions.CAMERA);
 		b = await Permissions.askAsync(Permissions.CAMERA_ROLL);
     c = await Permissions.askAsync(Permissions.LOCATION);
     if(a && b && c)
 		  this.setState({Permission: true});
 
-    this.state = {
-    Permission: null,
-    type: Camera.Constants.Type.front
-
-  }
+    
 	}
 	snap = async () => {
   if (this.camera) {
 
     let photo = await this.camera.takePictureAsync();
-    userID =  String(Math.floor(Math.random() * 1000));
     try {
-        await AsyncStorage.setItem('userID', userID);
+        await AsyncStorage.setItem('hasDefault', "1");
         this.props.method()
   	} catch (error) {
   		console.log("Error using storage");
   	}
   	console.log("Recorded the location of a photo: " + photo["uri"]);
     //CameraRoll.saveToCameraRoll(photo["uri"]);
-    let image_file_name = "image" + userID + ".jpg";
+    let image_file_name = "image" + String(Math.floor(Math.random() * 1000)) + ".jpg";
   /*
     const file = {
 	  // `uri` can also be a file system path (i.e. file://)
@@ -65,8 +59,7 @@ class ConfigCamera extends Component {
         "image_uri": image_file_name,
         "latitude": null,
         "longitude": null,
-        "post_time": null,
-        "uid": userID
+        "post_time": null
       }
     }
     const path = "/media";
