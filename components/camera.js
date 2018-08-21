@@ -4,7 +4,7 @@ import {Camera, Permissions, Location} from 'expo'
 import {Container, Content, Header, Item, Icon, Input, Button } from "native-base"
 import { MaterialCommunityIcons, Octicons } from '@expo/vector-icons';
 import { API, Storage } from 'aws-amplify';
-import { RNS3 } from 'react-native-aws3';
+import uniqueId from 'react-native-unique-id';
 
 class CameraComponent extends Component {
 	constructor(props) {
@@ -42,7 +42,7 @@ class CameraComponent extends Component {
     user = JSON.parse(await AsyncStorage.getItem("user"));
     let userId = user["username"];
 
-    var random = Math.floor(Math.random() * 100000000)
+    var random = await uniqueId();
     var image_file_name = "image" + random + ".jpg";
     //New
     let newNote = {

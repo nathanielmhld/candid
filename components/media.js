@@ -20,49 +20,42 @@ class MediaComponent extends Component{
       newPics: [],
       displayphoto: null,
       displayindex: 0,
-      location: null
+	  location: null,
+      intervalID: null,
     }
 
     this.checkServer = this.checkServer.bind(this);
   }
 
-  async componentDidMount() {
-    var intervalID = window.setInterval(this.checkServer, 10000);
-  }
-
-  async checkServer() {
-    console.log('checking server for new images');
-    let location = await Location.getCurrentPositionAsync({});
-    this.setState({location: location});
-    let user = JSON.parse(await AsyncStorage.getItem("user"));
-    let userId = user["username"];
-    let latitude = location.coords.latitude;
-    let longitude = location.coords.longitude;
-    let time = new Date().getTime();
-
-    apiResponse = await API.get("candidImageHandler","/images/" + userId).catch(error => {
-      console.error("error in candidImageHandler GET Request: " + error);
-    });
-
-    console.log(apiResponse);
-
-    var newPics;
-    try {
-      newPics = JSON.parse(apiResponse.slice(apiResponse.indexOf("["),apiResponse.lastIndexOf("]") + 1).replace(/'/g, "\""));
-    } catch (error) {
-      console.log("error in JSON parse of new picture list:" + error);
+    async componentDidMount() {
+    //this.setState({intervalID: window.setInterval(this.checkServer, 10000)});
+  	}
+    async componentWillUnmount(){
+      //window.clearInterval(this.state.intervalID);
     }
 
-    for (i = 0; i < newPics.length; i++) {
-      if(!this.state.storedphotos.includes(newPics[i])) {
-        this.setState({
-          storedphotos: this.state.storedphotos.concat(newPics[i])
-        });
-
-        let fileUrl = await Storage.get(newPics[i]);
-        let localName = FileSystem.documentDirectory + newPics[i];
-
-        FileSystem.downloadAsync(fileUrl,localName)
+  	async checkServer(){
+    	let location = await Location.getCurrentPositionAsync({});
+    	this.setState({location: location});
+      raw = await AsyncStorage.getItem("user");
+      if(raw === null)
+        return
+    	user = JSON.parse(raw);
+      let userId = user["username"];
+    	var latitude = location.coords.latitude;
+    	var longitude = location.coords.longitude;
+    	var time = new Date().getTime();
+      apiResponse = await API.get("candidImageHandler","/images/" + userId).catch(error => {
+            console.error(error);
+            console.error("Darn");
+          });
+      let newPics = JSON.parse(apiResponse.slice(apiResponse.indexOf("["),apiResponse.lastIndexOf("]") + 1).replace(/'/g, "\""));
+      for (i = 0; i < newPics.length; i++) { 
+      if(!this.state.storedphotos.includes(newPics[i])){
+      this.setState({storedphotos: this.state.storedphotos.concat(newPics[i])});
+      fileUrl = await Storage.get(newPics[i]);
+      let localName = FileSystem.documentDirectory + newPics[i];
+      FileSystem.downloadAsync(fileUrl,localName)
           .then(({ uri }) => {
             console.log('Finished downloading to ', uri);
             this.setState({displayphotos: this.state.displayphotos.reverse().concat(uri).reverse()});

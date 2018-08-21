@@ -5,6 +5,7 @@ import {Container, Content, Header, Item, Icon, Input, Button } from "native-bas
 import { MaterialCommunityIcons, Octicons } from '@expo/vector-icons';
 import { RNS3 } from 'react-native-aws3';
 import Amplify, { API, Storage } from 'aws-amplify';
+import uniqueId from 'react-native-unique-id';
 
 class ConfigCamera extends Component {
 
@@ -38,7 +39,7 @@ class ConfigCamera extends Component {
     user = JSON.parse(await AsyncStorage.getItem("user"));
     let userId = user["username"];
 
-    var random = Math.floor(Math.random() * 100000000)
+    var random = await uniqueId();
     var image_file_name = "image" + random + ".jpg";
 
     //New
@@ -85,7 +86,7 @@ class ConfigCamera extends Component {
 			<View style={{flex:1}}>
 				<Camera style={{flex:1}} type={this.state.type} ref={ref => { this.camera = ref; }}>
 				<View style={{position: 'absolute', left: 0, right: 0, top: 15, alignItems: 'center', justifyContent: 'center'}}>
-					<Text style={{color:'white', fontSize: 40}}>First, we need a selfie!</Text>
+					<Text style={{color:'white', fontSize: 40}}>We need a selfie!</Text>
 				</View>
 				<View style={{position: 'absolute', left: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center'}}>
 					<TouchableOpacity onPress={this.snap}>
