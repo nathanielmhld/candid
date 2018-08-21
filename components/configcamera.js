@@ -4,8 +4,8 @@ import {Camera, Permissions, GestureHandler, Location} from 'expo'
 import {Container, Content, Header, Item, Icon, Input, Button } from "native-base"
 import { MaterialCommunityIcons, Octicons } from '@expo/vector-icons';
 import { RNS3 } from 'react-native-aws3';
-import Amplify, { API, Storage } from 'aws-amplify';
 import uniqueId from 'react-native-unique-id';
+import AWSHandler from '../ServerHandler/AWSHandler'
 
 class ConfigCamera extends Component {
 
@@ -27,50 +27,37 @@ class ConfigCamera extends Component {
 	}
 
 	snap = async () => {
-  if (this.camera) {
-    let photo = await this.camera.takePictureAsync();
-    try {
-        await AsyncStorage.setItem('hasDefault', "1");
-        this.props.method()
-  	} catch (error) {
-  		console.log("Error using storage");
-  	}
+    if (this.camera) {
+      let photo = await this.camera.takePictureAsync();
+      try {
+          await AsyncStorage.setItem('hasDefault', "1");
+          this.props.method()
+    	} catch (error) {
+    		console.log("Error using storage");
+    	}
 
-    user = JSON.parse(await AsyncStorage.getItem("user"));
-    let userId = user["username"];
+      user = JSON.parse(await AsyncStorage.getItem("user"));
+      let userId = user["username"];
 
-    var random = await uniqueId();
-    var image_file_name = "image" + random + ".jpg";
+      var random = await uniqueId();
+      var image_file_name = "image" + random + ".jpg";
 
-    //New
-    let data = {
-      body: {
-       "image_uri": image_file_name,
-       "latitude": 0,
-       "longitude": 0,
-       "post_time": 0,
-       "username": userId,
-       "default_image": true
-     }
+      //New
+      let data = {
+        body: {
+         "image_uri": image_file_name,
+         "latitude": 0,
+         "longitude": 0,
+         "post_time": 0,
+         "username": userId,
+         "default_image": true
+       }
+      }
+      const path = "/images";
+
+      AWSHandler.handleImageUpload(data, photo["uri"], image_file_name);
     }
-    const path = "/images";
-
-    const options = { level: 'public', contentType: 'image/jpeg' };
-    fetch(photo["uri"]).then(response => {
-      response.blob().then(blob => {
-        Storage.put(image_file_name, blob, options).then(() => {
-          API.put("candidImageHandler", path, data).then(apiResponse => {
-            console.log(apiResponse);
-            this.setState({apiResponse});
-          }).catch(e => {
-            console.log('fatal error in here!')
-            console.log(e);
-          })
-        })
-      })
-    })
-  }
-};
+  };
 
 	render() {
 		if(this.state.Permission === null)

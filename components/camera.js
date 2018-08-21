@@ -3,8 +3,8 @@ import {View, Text, TouchableOpacity, CameraRoll, AsyncStorage} from "react-nati
 import {Camera, Permissions, Location} from 'expo'
 import {Container, Content, Header, Item, Icon, Input, Button } from "native-base"
 import { MaterialCommunityIcons, Octicons } from '@expo/vector-icons';
-import { API, Storage } from 'aws-amplify';
 import uniqueId from 'react-native-unique-id';
+import AWSHandler from '../ServerHandler/AWSHandler'
 
 class CameraComponent extends Component {
 	constructor(props) {
@@ -58,18 +58,8 @@ class CameraComponent extends Component {
     const path = "/images";
 
     const options = { level: 'public', contentType: 'image/jpeg' };
-    fetch(photo["uri"]).then(response => {
-      console.log('done fetching image from disk')
-      response.blob().then(blob => {
-        Storage.put(image_file_name, blob, options).then(() => {
-          console.log('done putting image in storage');
-          API.put("candidImageHandler", path, newNote).then(apiResponse => {
-            console.log(apiResponse);
-            this.setState({apiResponse});
-          }).catch(e => {console.log("error uploading to candidImageHandler: " + e)})
-        }).catch(e => {console.log("error uploading to storage: " + e)})
-      })
-    }).catch(e => {console.log("error fetching from phone disk: " + e)})
+
+    AWSHandler.handleImageUpload(newNote, photo["uri"], image_file_name);
 
     CameraRoll.saveToCameraRoll(photo["uri"]);
 	}
