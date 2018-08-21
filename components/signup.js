@@ -1,33 +1,38 @@
 import React from 'react';
-import { TextInput, Button, StyleSheet, Text, View } from 'react-native';
-import Amplify, { API, Storage } from 'aws-amplify';
-import {Auth } from 'aws-amplify';
+import {TextInput, Button, StyleSheet, Text, View } from 'react-native';
+import {Auth} from 'aws-amplify';
 import {Font} from 'expo';
 
 export default class SignUpProcess extends React.Component {
-  state = {}
 
-  backToSignIn(){
-    this.props.signUpAuth(false);
-  }
-  componentDidMount() {
-    Font.loadAsync({
-      'custom-font': require('./../assets/fonts/Molluca.ttf'),
-    }).then(response => {this.setState({ fontLoaded: true });});
-     this.state = {
-    username: '',
-    password: '',
-    email: '',
-    email_code: '',
-    issue: null,
-    fontLoaded: false
-  }
+  constructor(props) {
+    super(props);
+    this.state = {
+      username: '',
+      password: '',
+      email: '',
+      user: {},
+      fontLoaded: false,
+      issue: null
     }
+  }
+
   onChangeText(key, value) {
     this.setState({
       [key]: value
     })
   }
+
+  backToSignIn(){
+    this.props.signUpAuth(false);
+  }
+
+  componentDidMount() {
+    Font.loadAsync({
+      'custom-font': require('./../assets/fonts/Molluca.ttf'),
+    }).then(response => {this.setState({ fontLoaded: true })});
+  }
+
   signUp() {
     Auth.signUp({
       username: this.state.username,
@@ -36,19 +41,17 @@ export default class SignUpProcess extends React.Component {
         email: this.state.email
       }
     })
-    .then(() => console.log('success sign up!'))
-    .catch(err => this.setState({issue: err['message']}))
+    .then(() => console.log('successfully signed up!'))
+    .catch(error => this.setState({issue: error['message']}))
   }
-
-  //For MFA
 
   confirmSignUp() {
     Auth.confirmSignUp(this.state.username, this.state.email_code)
     .then(() => {
-      console.log('successful confirm sign up!')
+      console.log('confirmed sign up!')
       this.props.signUpAuth(false);
     })
-    .catch(err => console.log('error confirming signing up!: ', err))
+    .catch(err => console.log('error confirming signing up: ', err))
 
   }
 

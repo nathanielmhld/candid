@@ -13,7 +13,7 @@ import SignInProcess from './components/signin'
 import Amplify, { API } from 'aws-amplify';
 
 import aws_exports from './aws-exports';
-
+Amplify.configure(aws_exports);
 
 const styles = StyleSheet.create({
   slideDefault:{
@@ -54,7 +54,7 @@ export default class App extends React.Component {
     this.signOut = this.signOut.bind(this);
 
 
-    Amplify.configure(aws_exports);
+
   }
   authenticate(isAuthenticated) {
     console.log('setting authentication to true');

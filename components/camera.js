@@ -1,56 +1,49 @@
 import React, { Component } from "react";
-import {View, Text, StyleSheet, TouchableOpacity, CameraRoll, AsyncStorage} from "react-native";
-import {Camera, Permissions, GestureHandler, Location} from 'expo'
+import {View, Text, TouchableOpacity, CameraRoll, AsyncStorage} from "react-native";
+import {Camera, Permissions, Location} from 'expo'
 import {Container, Content, Header, Item, Icon, Input, Button } from "native-base"
 import { MaterialCommunityIcons, Octicons } from '@expo/vector-icons';
-import Amplify, { API, Storage } from 'aws-amplify';
-import aws_exports from './../aws-exports';
+import { API, Storage } from 'aws-amplify';
 import { RNS3 } from 'react-native-aws3';
 
-class CameraComponent extends Component{
+class CameraComponent extends Component {
 	constructor(props) {
     super(props);
-    Amplify.configure(aws_exports);
+    this.state = {
+      Permission: null,
+      type: Camera.Constants.Type.back,
+      apiResponse: null,
+      noteId: ''
+    };
   };
-
 
   handleChangeNoteId = (event) => {
     this.setState({noteId: event});
 	};
 
-  state = {};
-
-	async componentDidMount(){
-    this.setState({
-    Permission: null,
-    type: Camera.Constants.Type.back,
-    apiResponse: null,
-      noteId: ''
-  });
-		a = await Permissions.askAsync(Permissions.CAMERA);
-		b = await Permissions.askAsync(Permissions.CAMERA_ROLL);
-    c = await Permissions.askAsync(Permissions.LOCATION);
-    if(a && b && c)
+	async componentDidMount() {
+		camera = await Permissions.askAsync(Permissions.CAMERA);
+		cameraRoll = await Permissions.askAsync(Permissions.CAMERA_ROLL);
+    location = await Permissions.askAsync(Permissions.LOCATION);
+    if(camera && cameraRoll && location)
 		  this.setState({Permission: true});
-    
 	}
 
 	snap = async () => {
-  console.log('snapping a picture!');
+  var time0 = Date.now();
   if (this.camera) {
-    console.log('inside the camera');
-  	let location = await Location.getCurrentPositionAsync({});
-    var latitude = location.coords.latitude;
-    var longitude = location.coords.longitude;
     var time = new Date().getTime();
     let photo = await this.camera.takePictureAsync();
+
+    //let location = await Location.getCurrentPositionAsync({});
+    var latitude = 0; //location.coords.latitude;
+    var longitude = 0;//location.coords.longitude;
+
     user = JSON.parse(await AsyncStorage.getItem("user"));
     let userId = user["username"];
 
-    console.log("inside the camera part 1");
     var random = Math.floor(Math.random() * 100000000)
     var image_file_name = "image" + random + ".jpg";
-
     //New
     let newNote = {
       body: {
@@ -66,16 +59,18 @@ class CameraComponent extends Component{
 
     const options = { level: 'public', contentType: 'image/jpeg' };
     fetch(photo["uri"]).then(response => {
+      console.log('done fetching image from disk')
       response.blob().then(blob => {
         Storage.put(image_file_name, blob, options).then(() => {
+          console.log('done putting image in storage');
           API.put("candidImageHandler", path, newNote).then(apiResponse => {
             console.log(apiResponse);
             this.setState({apiResponse});
-          })
-        })
+          }).catch(e => {console.log("error uploading to candidImageHandler: " + e)})
+        }).catch(e => {console.log("error uploading to storage: " + e)})
       })
-    })
-    
+    }).catch(e => {console.log("error fetching from phone disk: " + e)})
+
     CameraRoll.saveToCameraRoll(photo["uri"]);
 	}
 };
@@ -89,7 +84,7 @@ class CameraComponent extends Component{
 		else if(Permission === false)
 		{
 			return <Text> No access to camera </Text>
-		}else{
+		} else {
 			return(
 
 			<View style={{flex:1}}>
@@ -117,9 +112,6 @@ class CameraComponent extends Component{
 		}
 	}
 }
-
-
-
 
 export default CameraComponent
 

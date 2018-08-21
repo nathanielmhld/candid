@@ -1,62 +1,55 @@
 import React from 'react';
-import { TextInput, Button, StyleSheet, Text, View, AsyncStorage } from 'react-native';
-import Amplify, { API, Storage } from 'aws-amplify';
-import {Auth } from 'aws-amplify';
+import {TextInput, Button, StyleSheet, Text, View, AsyncStorage } from 'react-native';
+import {Auth} from 'aws-amplify';
 import {Font} from 'expo';
 
 export default class SignInProcess extends React.Component {
-  state = {
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      username: '',
+      password: '',
+      email: '',
+      user: {},
+      fontLoaded: false,
+      issue: null
+    }
   }
+
   onChangeText(key, value) {
     this.setState({
       [key]: value
     })
   }
+
   signIn() {
-    console.log('trying to log in');
-    Auth.signIn(this.state.username, this.state.password)
-    .then(user => {
+    Auth.signIn(this.state.username, this.state.password).then(user => {
       this.setState({'user': user});
-      console.log("clear as day!!!!!")
-      console.log(user);
       AsyncStorage.setItem('user', JSON.stringify(user));
       this.props.signInAuth(true);
-    })
-    .catch(err => this.setState({issue: err['message']}))
+    }).catch(error => this.setState({issue: error['message']}))
   }
+
   signUpNow() {
     this.props.signUpAuth(true);
   }
+
   componentDidMount() {
     Font.loadAsync({
       'custom-font': require('./../assets/fonts/Molluca.ttf'),
     }).then(response => {this.setState({ fontLoaded: true });});
-    this.state = {
-    username: '',
-    password: '',
-    email: '',
-    user: {},
-    fontLoaded: false,
-    issue: null
   }
-  }
-
-  //For MFA
-  /*
-  confirmSignUp() {
-    Auth.confirmSignUp(this.state.username, this.state.confirmationCode)
-    .then(() => console.log('successful confirm sign up!'))
-    .catch(err => console.log('error confirming signing up!: ', err))
-  }*/
 
   render() {
     return (
       <View style={styles.container}>
-
-      {this.state.fontLoaded ? (
-      <Text style={styles.text}>Candid</Text>) : null}
-      {this.state.issue ? (
-      <Text style={styles.issue}>{this.state.issue}</Text>) : null}
+        {this.state.fontLoaded ? (
+          <Text style={styles.text}>Candid</Text>) : null
+        }
+        {this.state.issue ? (
+          <Text style={styles.issue}>{this.state.issue}</Text>) : null
+        }
         <TextInput
           onChangeText={value => this.onChangeText('username', value)}
           style={styles.input}
