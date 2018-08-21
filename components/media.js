@@ -38,14 +38,18 @@ class MediaComponent extends Component{
       newPics: [],
       displayphoto: null,
       displayindex: 0,
-	  location: null
+	  location: null,
+    intervalID: null,
     }
     this.checkServer = this.checkServer.bind(this);
     }
 
     async componentDidMount() {
-    var intervalID = window.setInterval(this.checkServer, 10000);
+    //this.setState({intervalID: window.setInterval(this.checkServer, 10000)});
   	}
+    async componentWillUnmount(){
+      //window.clearInterval(this.state.intervalID);
+    }
 
   	async checkServer(){
     	let location = await Location.getCurrentPositionAsync({});

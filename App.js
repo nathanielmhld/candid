@@ -1,6 +1,6 @@
 import React from 'react';
 import { Text, View, TouchableOpacity, StyleSheet, AsyncStorage, Image } from 'react-native';
-import {Permissions} from 'expo';
+import {Permissions, Notifications} from 'expo';
 import {Container, Content} from 'native-base';
 import Swiper from 'react-native-swiper';
 
@@ -46,7 +46,8 @@ export default class App extends React.Component {
       hasDefault: false,
       isLoggedIn: false,
       signUp: false,
-      loaded: false
+      loaded: false,
+      notification: {},
     }
     this.configure = this.configure.bind(this);
     this.reconfigure = this.reconfigure.bind(this);
@@ -59,7 +60,8 @@ export default class App extends React.Component {
   }
   authenticate(isAuthenticated) {
     console.log('setting authentication to true');
-    this.setState({ isLoggedIn: isAuthenticated})
+    this.setState({ isLoggedIn: isAuthenticated});
+    this.registerForPush();
   }
 
   needToSignUp(signUp) {
@@ -73,16 +75,45 @@ export default class App extends React.Component {
     console.log("sign out");
   }
 
+  async registerForPush(){
+    notificationresponse = await Permissions.askAsync(Permissions.NOTIFICATIONS);
+    console.log(notificationresponse)
+    if(notificationresponse){
+      //this._notificationSubscription = Notifications.addListener(this._handleNotification);
+      value = await AsyncStorage.getItem('user');
+      let userId = JSON.parse(value)["username"];
+
+      token = await Notifications.getExpoPushTokenAsync();
+      let newNote = {
+      body: {
+        "username": userId,
+       "token": token
+     }
+    }
+    console.log(newNote);
+    const path = "/tokens";
+    API.put("CandidTokenHandler", path, newNote).then(apiResponse => {
+      console.log(apiResponse);
+    });
+  }
+}
+
   async componentDidMount(){
     this.setState({loaded: false});
+
+
     let value = await AsyncStorage.getItem('hasDefault');
     this.setState({hasDefault: value});
     console.log(value);
     value = await AsyncStorage.getItem('user');
     if (value){
       this.setState({isLoggedIn: true});
+      this.setState({loaded: true});
+      this.registerForPush();
+    }else{
+      this.setState({loaded: true});
     }
-    this.setState({loaded: true});
+    
   }
 
   async reconfigure(){
