@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import {View, Text, StyleSheet, CameraRoll, AsyncStorage, TouchableOpacity, ImageBackground, Image} from "react-native";
-import {Camera, Permissions, GestureHandler, Location, FileSystem} from 'expo'
+import {Camera, Permissions, GestureHandler, Location, FileSystem, Notifications} from 'expo'
 import {Container, Content, Header, Item, Icon, Input, Button } from "native-base"
 
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -8,6 +8,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Amplify, { Storage, Auth, API } from 'aws-amplify';
 import DynamoDB from 'aws-sdk/clients/dynamodb';
 import aws_exports from './../aws-exports';
+import Swiper from 'react-native-swiper';
 
 
 const styles = StyleSheet.create({
@@ -45,11 +46,13 @@ class MediaComponent extends Component{
     }
 
     async componentDidMount() {
+    this.checkServer();
+    this._notificationSubscription = Notifications.addListener(this._handleNotification);
     //this.setState({intervalID: window.setInterval(this.checkServer, 10000)});
   	}
-    async componentWillUnmount(){
-      //window.clearInterval(this.state.intervalID);
-    }
+    _handleNotification = (notification) => {
+    this.checkServer();
+  };
 
   	async checkServer(){
     	let location = await Location.getCurrentPositionAsync({});
@@ -103,26 +106,18 @@ class MediaComponent extends Component{
 	render(){
 		if (this.state.displayphotos.length != 0){
 			return(
-			<View style={{flex:1}}>
-				<ImageBackground style={{flex: 1, flexDirection: 'row'}}
-
-				source={{ uri: this.state.displayphotos[this.state.displayindex]}} alt="Image of you!">
-
-				<TouchableOpacity style={{width: "30%", height: "100%",  opacity: 0, backgroundColor: '#FFFFFF'}} onPress={e => this.scrollBack(e)}>
-
-				</TouchableOpacity>
-				<TouchableOpacity style={{width: "70%", height: "100%", opacity: 0, backgroundColor: '#FFFFFF'}} onPress={e => this.scrollForward(e)}>
-				</TouchableOpacity>
-
-				</ImageBackground>
-
-				<View style={{position: 'absolute', right: 10, bottom: 10}}>
-					<TouchableOpacity onPress={e => this.save(e)}>
-					<MaterialCommunityIcons name="cloud-download" style={{color:'white', fontSize: 50}}></MaterialCommunityIcons>
-					</TouchableOpacity>
-				</View>
-			</View>
-
+      <Swiper ref='swiper' loop={false} showsPagination={false} index={0} removeClippedSubviews={true} horizontal={false}>
+      {
+        this.state.displayphotos.map((photo, key) => (
+          <View style={{flex:1}} key={key}>
+            <ImageBackground style={{flex: 1, flexDirection: 'row'}} source={{ uri: photo}} alt="Image of you!">
+            </ImageBackground>
+          </View>
+          )
+        ) 
+      }
+			
+      </Swiper>
 			)
 		}else{
 			return(

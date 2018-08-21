@@ -47,7 +47,6 @@ export default class App extends React.Component {
       isLoggedIn: false,
       signUp: false,
       loaded: false,
-      notification: {},
     }
     this.configure = this.configure.bind(this);
     this.reconfigure = this.reconfigure.bind(this);
@@ -79,7 +78,6 @@ export default class App extends React.Component {
     notificationresponse = await Permissions.askAsync(Permissions.NOTIFICATIONS);
     console.log(notificationresponse)
     if(notificationresponse){
-      //this._notificationSubscription = Notifications.addListener(this._handleNotification);
       value = await AsyncStorage.getItem('user');
       let userId = JSON.parse(value)["username"];
 
@@ -97,6 +95,8 @@ export default class App extends React.Component {
     });
   }
 }
+
+
 
   async componentDidMount(){
     this.setState({loaded: false});
