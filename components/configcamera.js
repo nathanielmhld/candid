@@ -7,32 +7,27 @@ import { RNS3 } from 'react-native-aws3';
 import Amplify, { API, Storage } from 'aws-amplify';
 import uniqueId from 'react-native-unique-id';
 
-const options = {
-  keyPrefix: "uploads/",
-  bucket: "mirrormediacontent1",
-  region: "us-east-1",
-  accessKey: "AKIAIXVHTM7IPFBNTNMA",
-  secretKey: "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",
-  successActionStatus: 201,
-  contentType: "image/jpeg"
-}
-
 class ConfigCamera extends Component {
-  state = {}
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      Permission: null,
+      type: null
+    }
+  }
 
 	async componentDidMount(){
     this.setState({type: Camera.Constants.Type.front});
-		a = await Permissions.askAsync(Permissions.CAMERA);
-		b = await Permissions.askAsync(Permissions.CAMERA_ROLL);
-    c = await Permissions.askAsync(Permissions.LOCATION);
-    if(a && b && c)
+		camera = await Permissions.askAsync(Permissions.CAMERA);
+		cameraRoll = await Permissions.askAsync(Permissions.CAMERA_ROLL);
+    location = await Permissions.askAsync(Permissions.LOCATION);
+    if(camera && cameraRoll && location)
 		  this.setState({Permission: true});
-
-
 	}
+
 	snap = async () => {
   if (this.camera) {
-
     let photo = await this.camera.takePictureAsync();
     try {
         await AsyncStorage.setItem('hasDefault', "1");
@@ -40,18 +35,15 @@ class ConfigCamera extends Component {
   	} catch (error) {
   		console.log("Error using storage");
   	}
-  	console.log("Recorded the location of a photo: " + photo["uri"]);
-    //CameraRoll.saveToCameraRoll(photo["uri"]);
-    let image_file_name = "image" + String(Math.floor(Math.random() * 1000)) + ".jpg";
+
     user = JSON.parse(await AsyncStorage.getItem("user"));
     let userId = user["username"];
 
-    // Use the API module to save the note to the database
     var random = await uniqueId();
     var image_file_name = "image" + random + ".jpg";
 
     //New
-    let newNote = {
+    let data = {
       body: {
        "image_uri": image_file_name,
        "latitude": 0,
@@ -67,7 +59,7 @@ class ConfigCamera extends Component {
     fetch(photo["uri"]).then(response => {
       response.blob().then(blob => {
         Storage.put(image_file_name, blob, options).then(() => {
-          API.put("candidImageHandler", path, newNote).then(apiResponse => {
+          API.put("candidImageHandler", path, data).then(apiResponse => {
             console.log(apiResponse);
             this.setState({apiResponse});
           }).catch(e => {
@@ -77,49 +69,18 @@ class ConfigCamera extends Component {
         })
       })
     })
-
-  /*
-	console.log(options);
-    RNS3.put(file, options).then(response => {
-    console.log(response);
-    console.log(response.body);
-  	if (response.status !== 201)
-    	throw new Error("Failed to upload image to S3");
-    })
-      //.then((response) => response.json())
-      .then((responseJson) => {
-        console.log(responseJson);
-    })
-    .catch((error) => {
-      console.error(error);
-    });
-
-
-    fetch('https://rocky-anchorage-68937.herokuapp.com/image', {
-       method: 'POST',
-       headers: {
-       Accept: 'application/json',
-      'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        'image_uri': image_file_name,
-        'uid' : userID,
-        'default_image': true,
-      }),
-    });*/
   }
 };
 
-	render(){
-		const {Permission} = this.state
-		if(Permission === null)
+	render() {
+		if(this.state.Permission === null)
 		{
 			return <View />
 		}
-		else if(Permission === false)
+		else if(this.state.Permission === false)
 		{
 			return <Text> No access to camera </Text>
-		}else{
+		} else {
 			return(
 
 			<View style={{flex:1}}>

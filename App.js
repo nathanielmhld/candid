@@ -13,7 +13,7 @@ import SignInProcess from './components/signin'
 import Amplify, { API } from 'aws-amplify';
 
 import aws_exports from './aws-exports';
-
+Amplify.configure(aws_exports);
 
 const styles = StyleSheet.create({
   slideDefault:{
@@ -53,10 +53,8 @@ export default class App extends React.Component {
     this.authenticate = this.authenticate.bind(this);
     this.needToSignUp = this.needToSignUp.bind(this);
     this.signOut = this.signOut.bind(this);
-
-
-    Amplify.configure(aws_exports);
   }
+  
   authenticate(isAuthenticated) {
     console.log('setting authentication to true');
     this.setState({ isLoggedIn: isAuthenticated});
@@ -100,7 +98,6 @@ export default class App extends React.Component {
 
   async componentDidMount(){
     this.setState({loaded: false});
-
 
     let value = await AsyncStorage.getItem('hasDefault');
     this.setState({hasDefault: value});
