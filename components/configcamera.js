@@ -4,10 +4,16 @@ import {Camera, Permissions, GestureHandler, Location} from 'expo'
 import {Container, Content, Header, Item, Icon, Input, Button } from "native-base"
 import { MaterialCommunityIcons, Octicons } from '@expo/vector-icons';
 import { RNS3 } from 'react-native-aws3';
-import uniqueId from 'react-native-unique-id';
 import AWSHandler from '../ServerHandler/AWSHandler'
 
 class ConfigCamera extends Component {
+
+  uuidv4 = () => {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  }
 
   constructor(props) {
     super(props);
@@ -39,7 +45,7 @@ class ConfigCamera extends Component {
       user = JSON.parse(await AsyncStorage.getItem("user"));
       let userId = user["username"];
 
-      var random = await uniqueId();
+      var random = this.uuidv4();
       var image_file_name = "image" + random + ".jpg";
 
       //New

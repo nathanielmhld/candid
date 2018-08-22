@@ -19,7 +19,16 @@ AWSHandler = {
                 }).catch(e => {
                     console.log("error: uploading to candidImageHandler: " + e)
                     console.log(data);
-                })
+                    console.log("trying again in 5 seconds");
+                    setTimeout(function() {
+                        API.put("candidImageHandler", "/images", data).then(apiResponse => {
+                            console.log(apiResponse);
+                        }).catch(e => {
+                            console.log("error: likely due to a malformed lambda response issue");
+                            console.log(e);
+                        });
+                    });
+                });
             }).catch(e => {console.log("error: uploading to storage: " + e)})
           })
         }).catch(e => {console.log("error: fetching from phone disk: " + e)})

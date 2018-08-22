@@ -3,7 +3,6 @@ import {View, Text, TouchableOpacity, CameraRoll, AsyncStorage} from "react-nati
 import {Camera, Permissions, Location} from 'expo'
 import {Container, Content, Header, Item, Icon, Input, Button } from "native-base"
 import { MaterialCommunityIcons, Octicons } from '@expo/vector-icons';
-import uniqueId from 'react-native-unique-id';
 import AWSHandler from '../ServerHandler/AWSHandler'
 
 class CameraComponent extends Component {
@@ -16,6 +15,13 @@ class CameraComponent extends Component {
       noteId: ''
     };
   };
+
+  uuidv4 = () => {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  }
 
   handleChangeNoteId = (event) => {
     this.setState({noteId: event});
@@ -42,7 +48,7 @@ class CameraComponent extends Component {
     user = JSON.parse(await AsyncStorage.getItem("user"));
     let userId = user["username"];
 
-    var random = await uniqueId();
+    var random = this.uuidv4();
     var image_file_name = "image" + random + ".jpg";
     //New
     let newNote = {
