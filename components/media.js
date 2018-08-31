@@ -5,9 +5,11 @@ import {View, Text, StyleSheet, CameraRoll, AsyncStorage, TouchableOpacity,
   ImageBackground, Image, ScrollView, FlatList, Dimensions
 } from "react-native";
 import { Camera, Permissions, Location, FileSystem, Notifications, Font} from 'expo'
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import Amplify, { Storage, API } from 'aws-amplify';
 import aws_exports from './../aws-exports';
+import { Container, Content, Icon, Header, Left, Body, Right, Segment, Button } from 'native-base'
+
 
 class MediaComponent extends Component{
 
@@ -103,6 +105,15 @@ class MediaComponent extends Component{
 
 		if(this.state.displayphotos !== []){
     return(
+      <Container style={styles.headcontainer}>
+       <Header style={{ paddingLeft: 10, paddingLeft: 10 }}>
+                    <Left>
+                        <Text>md-person-add</Text>
+                    </Left>
+                    <Right>
+                        <Ionicons name="ios-more" style={{color:'black', fontSize: 30}}></Ionicons>
+                    </Right>
+        </Header>
     <View style={styles.wrapper}>
     <ScrollView contentContainerStyle={styles.container}>
         <FlatList
@@ -119,6 +130,7 @@ class MediaComponent extends Component{
         />     
     </ScrollView>
 </View>
+</Container>
 )}else{
       return(
       <View/>)
@@ -131,6 +143,10 @@ const styles = StyleSheet.create({
   wrapper: {
     flex: 1
 },
+headcontainer: {
+        flex: 1,
+        backgroundColor: 'white'
+    },
 container: {
     flexDirection: 'row',
     paddingHorizontal: 5
