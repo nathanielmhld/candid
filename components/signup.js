@@ -38,11 +38,14 @@ export default class SignUpProcess extends React.Component {
       username: this.state.username,
       password: this.state.password,
       attributes: {
-        email: this.state.email
+        name: this.state.email
       }
     })
-    .then(() => console.log('successfully signed up!'))
-    .catch(error => this.setState({issue: error['message']}))
+    .then(() => {
+      console.log('successfully signed up!');
+      this.props.signUpAuth(false);
+    })
+    .catch(error => console.log(error))
   }
 
   confirmSignUp() {
@@ -68,7 +71,7 @@ export default class SignUpProcess extends React.Component {
         <TextInput
           onChangeText={value => this.onChangeText('username', value)}
           style={styles.input}
-          placeholder='username'
+          placeholder='phone_number'
         />
         <TextInput
           onChangeText={value => this.onChangeText('password', value)}
@@ -79,15 +82,9 @@ export default class SignUpProcess extends React.Component {
         <TextInput
           onChangeText={value => this.onChangeText('email', value)}
           style={styles.input}
-          placeholder='email'
+          placeholder='name'
         />
         <Button title="Sign Up" onPress={this.signUp.bind(this)} />
-        <TextInput
-          onChangeText={value => this.onChangeText('email_code', value)}
-          style={styles.input}
-          placeholder='email_code'
-        />
-        <Button title="Confirm Email Code" onPress={this.confirmSignUp.bind(this)} />
       </View>
     );
   }
