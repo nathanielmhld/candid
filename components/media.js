@@ -2,13 +2,12 @@ import React, {
   Component
 } from "react";
 import {View, Text, StyleSheet, CameraRoll, AsyncStorage, TouchableOpacity,
-  ImageBackground, Image
+  ImageBackground, Image, ScrollView, FlatList, Dimensions
 } from "react-native";
-import { Camera, Permissions, Location, FileSystem, Notifications} from 'expo'
+import { Camera, Permissions, Location, FileSystem, Notifications, Font} from 'expo'
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Amplify, { Storage, API } from 'aws-amplify';
 import aws_exports from './../aws-exports';
-import Swiper from 'react-native-swiper';
 
 class MediaComponent extends Component{
 
@@ -20,9 +19,10 @@ class MediaComponent extends Component{
       storedphotos: [],
       newPics: [],
       displayphoto: null,
-      displayindex: 0,
+      displayindex: 1,
     location: null,
       intervalID: null,
+      fontLoaded: false
     }
 
     this.checkServer = this.checkServer.bind(this);
@@ -32,11 +32,18 @@ class MediaComponent extends Component{
     this.checkServer();
     this._notificationSubscription = Notifications.addListener(this._handleNotification);
     //this.setState({intervalID: window.setInterval(this.checkServer, 10000)});
+    Font.loadAsync({
+      'custom-font': require('./../assets/fonts/Molluca.ttf'),
+    }).then(response => {this.setState({ fontLoaded: true })});
+
+
+
 	}
-  
+
   _handleNotification = (notification) => {
     this.checkServer();
   };
+
 
 	async checkServer() {
   	let location = await Location.getCurrentPositionAsync({});
@@ -60,61 +67,73 @@ class MediaComponent extends Component{
     fileUrl = await Storage.get(newPics[i]);
     let localName = FileSystem.documentDirectory + newPics[i];
     FileSystem.downloadAsync(fileUrl,localName)
-        .then(({ uri }) => {
+        .then(async ({ uri }) => {
           console.log('Finished downloading to ', uri);
-          this.setState({displayphotos: this.state.displayphotos.reverse().concat(uri).reverse()});
+          Image.getSize(uri, (width, height) => {
+            this.setState({displayphotos: this.state.displayphotos.reverse().concat({key: uri, width: width, height: height}).reverse()});
+          }, (error) => {
+            console.error(`Couldn't get the image size: ${error.message}`);
+          });
         })
       }
     }
   }
 
-	async scrollForward(e) {
-		if(this.state.displayindex < this.state.displayphotos.length - 1) {
-			this.setState({
-        displayindex: this.state.displayindex + 1
-      });
-		}
-	}
-
-	async scrollBack(e){
-		if(this.state.displayindex > 0){
-			this.setState({
-        displayindex: this.state.displayindex - 1
-			});
-		}
-	}
 
 	async save(e){
-		CameraRoll.saveToCameraRoll(this.state.displayphotos[this.state.displayindex]);
+		CameraRoll.saveToCameraRoll(e);
 	}
+  displayImage(item){
+    return(
+      <TouchableOpacity onPress={(e) => {this.save(item.key);}}>
+      <Image source={{ uri: item.key}} style={{width: Dimensions.get('window').width/3, height: (item.height/item.width)*Dimensions.get('window').width/3}}/>
+      </TouchableOpacity>
+      )
+  }
 
 	render(){
-		if (this.state.displayphotos.length != 0) {
-			return (
-      <Swiper ref='swiper' loop={false} showsPagination={false} index={0} removeClippedSubviews={true} horizontal={false}>
-      {
-        this.state.displayphotos.map((photo, key) => (
-          <View style={{flex:1}} key={key}>
-            <ImageBackground style={{flex: 1, flexDirection: 'row'}} source={{uri: photo}} alt="Image of you!">
-            </ImageBackground>
-          </View>
-          )
-        ) 
-      }
-			
-      </Swiper>
-			)
-		} else {
-			return (
-			<View style={styles.slideDefault}>
-        <Text style={styles.text}>No candids yet!</Text>
-      </View>
-      )
-		}
+
+
+		if(this.state.displayphotos !== []){
+    return(
+    <View style={styles.wrapper}>
+    <ScrollView contentContainerStyle={styles.container}>
+        <FlatList
+          data={this.state.displayphotos.filter((_,i) => i % 3 == 0)}
+          renderItem={({item}) => this.displayImage(item)}
+        />
+        <FlatList
+          data={this.state.displayphotos.filter((_,i) => i % 3 == 1)}
+          renderItem={({item}) =>  this.displayImage(item)}
+        />
+        <FlatList
+          data={this.state.displayphotos.filter((_,i) => i % 3 == 2)}
+          renderItem={({item}) => this.displayImage(item)}
+        />     
+    </ScrollView>
+</View>
+)}else{
+      return(
+      <View/>)
+    }
+
 	}
 }
 
 const styles = StyleSheet.create({
+  wrapper: {
+    flex: 1
+},
+container: {
+    flexDirection: 'row',
+    paddingHorizontal: 5
+},
+list: {
+    flex: 1,
+    flexDirection: 'column',
+    paddingVertical: 10,
+    paddingHorizontal: 5
+},
   slideDefault: {
     flex: 1,
     justifyContent: 'center',
@@ -126,7 +145,20 @@ const styles = StyleSheet.create({
     fontSize: 30,
     fontWeight: 'bold',
     textAlign: 'center',
-  }
+  },
+  opacity: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center'},
+
+  specialtext: {
+    backgroundColor: 'white',
+    color: 'black',
+    fontSize: 56,
+    fontFamily: 'custom-font',
+    justifyContent: 'center',
+    textAlign: 'center',
+    paddingTop: 10,}
 });
 
 export default MediaComponent

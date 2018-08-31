@@ -4,12 +4,11 @@ import {Permissions, Notifications} from 'expo';
 import {Container, Content} from 'native-base';
 import Swiper from 'react-native-swiper';
 
-import CameraComponent from './components/camera';
-
 import ConfigCamera from './components/configcamera';
 import MediaComponent from './components/media';
 import SignUpProcess from './components/signup'
 import SignInProcess from './components/signin'
+import Browser from './components/browser';
 import Amplify, { API } from 'aws-amplify';
 
 import aws_exports from './aws-exports';
@@ -47,12 +46,14 @@ export default class App extends React.Component {
       isLoggedIn: false,
       signUp: false,
       loaded: false,
+      swipe: false
     }
     this.configure = this.configure.bind(this);
     this.reconfigure = this.reconfigure.bind(this);
     this.authenticate = this.authenticate.bind(this);
     this.needToSignUp = this.needToSignUp.bind(this);
     this.signOut = this.signOut.bind(this);
+    this.changeSwipe = this.changeSwipe.bind(this);
   }
   
   authenticate(isAuthenticated) {
@@ -110,6 +111,14 @@ export default class App extends React.Component {
     }else{
       this.setState({loaded: true});
     }
+    value = await AsyncStorage.getItem('photoindex');
+    if(value == null){
+      try {
+        await AsyncStorage.setItem('photoindex', "0");
+    } catch (error) {
+      console.log("Error using storage");
+    }
+  }
     
   }
 
@@ -123,6 +132,11 @@ export default class App extends React.Component {
     this.setState({hasDefault: value});
 
   }
+  changeSwipe(e){
+    console.log(e);
+    this.setState({swipe: e});
+  }
+
   render() {
     if(!this.state.loaded)
       return(<View/>);
@@ -141,20 +155,22 @@ export default class App extends React.Component {
 
     const {hasDefault} = this.state
     if(hasDefault){
+      if(this.state.swipe){
+        return(<TinderSwipe method={this.changeSwipe}/>)
+      }else{
       return (
         <Swiper ref='swiper' loop={false} showsPagination={false} index={0} removeClippedSubviews={true}>
         <View style={{flex: 1}}>
-          <CameraComponent configure={this.reconfigure} signout={this.signOut}>
-          </CameraComponent>
+          <Browser >
+          </Browser>
         </View>
         <View style={{flex: 1}}>
-          <MediaComponent>
+          <MediaComponent method={this.changeSwipe}>
           </MediaComponent>
-
-        </View>
-
+          </View>
       </Swiper>
       );
+    }
     }else{
 
       return (
