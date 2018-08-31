@@ -106,17 +106,17 @@ def lambda_handler(event, context):
                     print ("Source %s; Target %s" % (source, target))
                     
                     response = rekognition.compare_faces(
-    	                SourceImage={
-    		                "S3Object": {
-    				            "Bucket": s3bucket,
-    				            "Name": source,
-    			            }
-    		            },
-    		            TargetImage={
-    			            "S3Object": {
-    				            "Bucket": s3bucket,
-    				            "Name": target,
-    			            }
+                        SourceImage={
+                            "S3Object": {
+                                "Bucket": s3bucket,
+                                "Name": source,
+                            }
+                        },
+                        TargetImage={
+                            "S3Object": {
+                                "Bucket": s3bucket,
+                                "Name": target,
+                            }
                         },
                         SimilarityThreshold=75
                     )
@@ -144,4 +144,3 @@ def lambda_handler(event, context):
     }
     
     return response_status
-
