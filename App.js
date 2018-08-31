@@ -55,7 +55,7 @@ export default class App extends React.Component {
     this.signOut = this.signOut.bind(this);
     this.changeSwipe = this.changeSwipe.bind(this);
   }
-  
+
   authenticate(isAuthenticated) {
     console.log('setting authentication to true');
     this.setState({ isLoggedIn: isAuthenticated});
@@ -119,7 +119,7 @@ export default class App extends React.Component {
       console.log("Error using storage");
     }
   }
-    
+
   }
 
   async reconfigure(){

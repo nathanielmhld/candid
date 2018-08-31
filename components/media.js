@@ -52,7 +52,8 @@ class MediaComponent extends Component{
     if(raw === null)
       return
   	user = JSON.parse(raw);
-    let userId = user["username"];
+    let userId = user.signInUserSession.idToken.payload.name;
+    console.log("userId: " + userId);
   	var latitude = location.coords.latitude;
   	var longitude = location.coords.longitude;
   	var time = new Date().getTime();
@@ -61,7 +62,7 @@ class MediaComponent extends Component{
           console.error("Darn");
         });
     let newPics = JSON.parse(apiResponse.slice(apiResponse.indexOf("["),apiResponse.lastIndexOf("]") + 1).replace(/'/g, "\""));
-    for (i = 0; i < newPics.length; i++) { 
+    for (i = 0; i < newPics.length; i++) {
     if(!this.state.storedphotos.includes(newPics[i])){
     this.setState({storedphotos: this.state.storedphotos.concat(newPics[i])});
     fileUrl = await Storage.get(newPics[i]);
@@ -116,7 +117,7 @@ class MediaComponent extends Component{
         <FlatList
           data={this.state.displayphotos.filter((_,i) => i % 3 == 2)}
           renderItem={({item}) => this.displayImage(item)}
-        />     
+        />
     </ScrollView>
 </View>
 )}else{
