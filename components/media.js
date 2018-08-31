@@ -80,12 +80,19 @@ class MediaComponent extends Component{
   }
 
 
-	async save(e){
-		CameraRoll.saveToCameraRoll(e);
+	async save(item){
+		CameraRoll.saveToCameraRoll(item.key);
+    var index = this.state.displayphotos.indexOf(item);
+    list = this.state.displayphotos
+    if (index > -1) {
+      this.state.displayphotos.splice(index, 1);
+    }
+    this.setState({displayphotos: list})
+
 	}
   displayImage(item){
     return(
-      <TouchableOpacity onPress={(e) => {this.save(item.key);}}>
+      <TouchableOpacity onPress={(e) => {this.save(item);}}>
       <Image source={{ uri: item.key}} style={{width: Dimensions.get('window').width/3, height: (item.height/item.width)*Dimensions.get('window').width/3}}/>
       </TouchableOpacity>
       )

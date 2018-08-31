@@ -45,7 +45,7 @@ componentDidMount(){
 
 // fill 'Library photos' example with local media
 }
-sendPicture = async (photo) => {
+sendPicture = async (item) => {
   var time0 = Date.now();
   var time = new Date().getTime();
 
@@ -72,7 +72,7 @@ sendPicture = async (photo) => {
   const path = "/images";
 
   const options = { level: 'public', contentType: 'image/jpeg' };
-  fetch(photo).then(response => {
+  fetch(item.photo).then(response => {
     console.log('done fetching image from disk')
     response.blob().then(blob => {
       Storage.put(image_file_name, blob, options).then(() => {
@@ -84,6 +84,13 @@ sendPicture = async (photo) => {
       }).catch(e => {console.log("error uploading to storage: " + e)})
     })
   }).catch(e => {console.log("error fetching from phone disk: " + e)})
+  var index = this.state.media.indexOf(item);
+    list = this.state.media
+    if (index > -1) {
+      this.state.media.splice(index, 1);
+    }
+    this.setState({media: list})
+
 }
 loadphotos(howmany){
   CameraRoll.getPhotos({
@@ -111,7 +118,7 @@ load(){
 }
 displayImage(item){
   return(
-    <TouchableOpacity onPress={(e) => {this.sendPicture(item.photo);}}>
+    <TouchableOpacity onPress={(e) => {this.sendPicture(item);}}>
     <Image source={{ uri: item.photo}} style={{width: Dimensions.get('window').width/3, height: (item.height/item.width)*Dimensions.get('window').width/3}}/>
     </TouchableOpacity>
     )
