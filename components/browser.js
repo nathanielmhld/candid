@@ -35,13 +35,15 @@ constructor(props){
       media: [],
       cursor: 0,
       apiResponse: null,
-      noteId: ''
+      noteId: '',
+      blackphotos: []
     };
 }
  handleChangeNoteId = (event) => {
     this.setState({noteId: event});
   };
 componentDidMount(){
+  this.getBlacklist()
   this.loadphotos(50);
 
 // fill 'Library photos' example with local media
@@ -85,6 +87,7 @@ sendPicture = async (item) => {
       }).catch(e => {console.log("error uploading to storage: " + e)})
     })
   }).catch(e => {console.log("error fetching from phone disk: " + e)})
+  this.addBlacklist(item.photo);
   var index = this.state.media.indexOf(item);
     list = this.state.media
     if (index > -1) {
@@ -101,7 +104,7 @@ loadphotos(howmany){
   .then(data => {
     const media = this.state.media;
     data.edges.forEach((d, i) =>
-      {if(i >= this.state.cursor){
+      {if(i >= this.state.cursor && !this.state.blackphotos.includes(d.node.image.uri)){
       media.push({
         photo: d.node.image.uri,
         key: d.node.image.uri,
@@ -124,6 +127,28 @@ displayImage(item){
     </TouchableOpacity>
     )
 }
+async addBlacklist(uri){
+    blacklist = await AsyncStorage.getItem('blacklist');
+    if(!blacklist){
+      blacklist = {images: []}
+    }else{
+      blacklist = JSON.parse(blacklist)
+    }
+    blacklist.images = blacklist.images.concat([uri]);
+    console.log("Blacklisting that image");
+    AsyncStorage.setItem('blacklist', JSON.stringify(blacklist));
+  }
+  async getBlacklist(){
+    blacklist = await AsyncStorage.getItem('blacklist');
+    if(!blacklist){
+      blacklist = {images: []}
+    }else{
+      blacklist = JSON.parse(blacklist)
+    }
+    blacklist = blacklist.images;
+    this.setState({blackphotos: this.state.blackphotos + blacklist});
+  }
+
 
   render() {
     if(this.state.media !== []){

@@ -9,6 +9,7 @@ import MediaComponent from './components/media';
 import SignUpProcess from './components/signup'
 import SignInProcess from './components/signin'
 import Browser from './components/browser';
+import SettingPage from './components/settings';
 import Amplify, { API } from 'aws-amplify';
 
 import aws_exports from './aws-exports';
@@ -46,14 +47,14 @@ export default class App extends React.Component {
       isLoggedIn: false,
       signUp: false,
       loaded: false,
-      swipe: false
+      page: ''
     }
     this.configure = this.configure.bind(this);
     this.reconfigure = this.reconfigure.bind(this);
     this.authenticate = this.authenticate.bind(this);
     this.needToSignUp = this.needToSignUp.bind(this);
     this.signOut = this.signOut.bind(this);
-    this.changeSwipe = this.changeSwipe.bind(this);
+    this.navigate = this.navigate.bind(this);
   }
 
   authenticate(isAuthenticated) {
@@ -68,6 +69,7 @@ export default class App extends React.Component {
   }
 
   async signOut() {
+    AsyncStorage.removeItem('hasDefault');
     AsyncStorage.removeItem('user');
     this.setState({isLoggedIn: false});
     console.log("sign out");
@@ -132,14 +134,21 @@ export default class App extends React.Component {
     this.setState({hasDefault: value});
 
   }
-  changeSwipe(e){
+  navigate(e){
     console.log(e);
-    this.setState({swipe: e});
+    if(e === "LogOut"){
+        this.setState({page: "SignIn"})
+        this.signOut();
+      }else{
+        this.setState({page: e});
+    }
   }
 
   render() {
     if(!this.state.loaded)
       return(<View/>);
+    if(this.state.page == 'settings')
+      return(<SettingPage method={this.navigate}></SettingPage>)
     if(this.state.signUp) {
       console.log('signup is true');
       return (
@@ -155,9 +164,6 @@ export default class App extends React.Component {
 
     const {hasDefault} = this.state
     if(hasDefault){
-      if(this.state.swipe){
-        return(<TinderSwipe method={this.changeSwipe}/>)
-      }else{
       return (
         <Swiper ref='swiper' loop={false} showsPagination={false} index={0} removeClippedSubviews={true}>
         <View style={{flex: 1}}>
@@ -165,12 +171,11 @@ export default class App extends React.Component {
           </Browser>
         </View>
         <View style={{flex: 1}}>
-          <MediaComponent method={this.changeSwipe}>
+          <MediaComponent method={this.navigate}>
           </MediaComponent>
           </View>
       </Swiper>
       );
-    }
     }else{
 
       return (

@@ -31,6 +31,7 @@ class MediaComponent extends Component{
     }
 
   async componentDidMount() {
+    this.getBlacklist();
     this.checkServer();
     this._notificationSubscription = Notifications.addListener(this._handleNotification);
     //this.setState({intervalID: window.setInterval(this.checkServer, 10000)});
@@ -81,10 +82,32 @@ class MediaComponent extends Component{
       }
     }
   }
+  async addBlacklist(uri){
+    blacklist = await AsyncStorage.getItem('blacklist');
+    if(!blacklist){
+      blacklist = {images: []}
+    }else{
+      blacklist = JSON.parse(blacklist)
+    }
+    blacklist.images = blacklist.images.concat([uri]);
+    console.log("Blacklisting that image");
+    AsyncStorage.setItem('blacklist', JSON.stringify(blacklist));
+  }
+  async getBlacklist(){
+    blacklist = await AsyncStorage.getItem('blacklist');
+    if(!blacklist){
+      blacklist = {images: []}
+    }else{
+      blacklist = JSON.parse(blacklist)
+    }
+    blacklist = blacklist.images;
+    this.setState({storedphotos: this.state.storedphotos + blacklist});
+  }
 
 
 	async save(item){
 		CameraRoll.saveToCameraRoll(item.key);
+    this.addBlacklist(item.key)
     var index = this.state.displayphotos.indexOf(item);
     list = this.state.displayphotos
     if (index > -1) {
@@ -108,11 +131,11 @@ class MediaComponent extends Component{
     return(
       <Container style={styles.headcontainer}>
        <Header style={{ paddingLeft: 10, paddingLeft: 10 }}>
-                    <Left>
-                        <Text>md-person-add</Text>
-                    </Left>
                     <Right>
-                        <Ionicons name="ios-more" style={{color:'black', fontSize: 30}}></Ionicons>
+                        <TouchableOpacity onPress={(e) => {this.props.method('settings');}}>
+                          <Ionicons name="ios-more" style={{color:'black', fontSize: 30}}>
+                          </Ionicons>
+                        </TouchableOpacity>
                     </Right>
         </Header>
     <View style={styles.wrapper}>
