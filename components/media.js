@@ -5,9 +5,11 @@ import {View, Text, StyleSheet, CameraRoll, AsyncStorage, TouchableOpacity,
   ImageBackground, Image, ScrollView, FlatList, Dimensions
 } from "react-native";
 import { Camera, Permissions, Location, FileSystem, Notifications, Font} from 'expo'
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import Amplify, { Storage, API } from 'aws-amplify';
 import aws_exports from './../aws-exports';
+import { Container, Content, Icon, Header, Left, Body, Right, Segment, Button } from 'native-base'
+
 
 class MediaComponent extends Component{
 
@@ -29,6 +31,7 @@ class MediaComponent extends Component{
     }
 
   async componentDidMount() {
+    this.getBlacklist();
     this.checkServer();
     this._notificationSubscription = Notifications.addListener(this._handleNotification);
     //this.setState({intervalID: window.setInterval(this.checkServer, 10000)});
@@ -79,10 +82,32 @@ class MediaComponent extends Component{
       }
     }
   }
+  async addBlacklist(uri){
+    blacklist = await AsyncStorage.getItem('blacklist');
+    if(!blacklist){
+      blacklist = {images: []}
+    }else{
+      blacklist = JSON.parse(blacklist)
+    }
+    blacklist.images = blacklist.images.concat([uri]);
+    console.log("Blacklisting that image");
+    AsyncStorage.setItem('blacklist', JSON.stringify(blacklist));
+  }
+  async getBlacklist(){
+    blacklist = await AsyncStorage.getItem('blacklist');
+    if(!blacklist){
+      blacklist = {images: []}
+    }else{
+      blacklist = JSON.parse(blacklist)
+    }
+    blacklist = blacklist.images;
+    this.setState({storedphotos: this.state.storedphotos + blacklist});
+  }
 
 
 	async save(item){
 		CameraRoll.saveToCameraRoll(item.key);
+    this.addBlacklist(item.key)
     var index = this.state.displayphotos.indexOf(item);
     list = this.state.displayphotos
     if (index > -1) {
@@ -104,6 +129,15 @@ class MediaComponent extends Component{
 
 		if(this.state.displayphotos !== []){
     return(
+      <Container style={styles.headcontainer}>
+       <Header style={{ paddingLeft: 10, paddingLeft: 10 }}>
+                    <Right>
+                        <TouchableOpacity onPress={(e) => {this.props.method('settings');}}>
+                          <Ionicons name="ios-more" style={{color:'black', fontSize: 30}}>
+                          </Ionicons>
+                        </TouchableOpacity>
+                    </Right>
+        </Header>
     <View style={styles.wrapper}>
     <ScrollView contentContainerStyle={styles.container}>
         <FlatList
@@ -120,6 +154,7 @@ class MediaComponent extends Component{
         />
     </ScrollView>
 </View>
+</Container>
 )}else{
       return(
       <View/>)
@@ -132,6 +167,10 @@ const styles = StyleSheet.create({
   wrapper: {
     flex: 1
 },
+headcontainer: {
+        flex: 1,
+        backgroundColor: 'white'
+    },
 container: {
     flexDirection: 'row',
     paddingHorizontal: 5

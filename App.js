@@ -10,6 +10,7 @@ import SignUpProcess from './components/signup'
 import SignInProcess from './components/signin'
 import Homepage from './components/homepage'
 import Browser from './components/browser';
+import SettingPage from './components/settings';
 import Amplify, { API } from 'aws-amplify';
 
 import aws_exports from './aws-exports';
@@ -50,14 +51,15 @@ export default class App extends React.Component {
       loaded: false,
       swipe: false,
       seeLogInPage: false,
-      seeSignUpPage: false
+      seeSignUpPage: false,
+      page: ''
     }
     this.configure = this.configure.bind(this);
     this.reconfigure = this.reconfigure.bind(this);
     this.authenticate = this.authenticate.bind(this);
     this.needToSignUp = this.needToSignUp.bind(this);
     this.signOut = this.signOut.bind(this);
-    this.changeSwipe = this.changeSwipe.bind(this);
+	 this.navigate = this.navigate.bind(this);
     this.logInPage = this.logInPage.bind(this);
     this.signUpPage = this.signUpPage.bind(this);
     this.homePage = this.homePage.bind(this);
@@ -87,8 +89,9 @@ export default class App extends React.Component {
   }
 
   async signOut() {
+    AsyncStorage.removeItem('hasDefault');
     AsyncStorage.removeItem('user');
-    this.setState({isLoggedIn: false});
+    this.setState({ seeLogInPage: false, seeSignUpPage: false, isLoggedInNEW: false, isLoggedIn: false});
     console.log("sign out");
   }
 
@@ -152,15 +155,22 @@ export default class App extends React.Component {
     this.setState({hasDefault: value});
 
   }
-  changeSwipe(e){
+  navigate(e){
     console.log(e);
-    this.setState({swipe: e});
+    if(e === "LogOut"){
+        this.setState({page: "SignIn"})
+        this.signOut();
+      }else{
+        this.setState({page: e});
+    }
   }
 
   render() {
     if(!this.state.loaded)
       return(<View/>);
-    if(this.state.seeSignUpPage) {
+    if(this.state.page == 'settings')
+      return(<SettingPage method={this.navigate}></SettingPage>)
+    if(this.state.signUp) {
       console.log('signup is true');
       return (
         <SignUpProcess signUpAuth={this.needToSignUp} homePage={this.homePage}> </SignUpProcess>
@@ -179,23 +189,18 @@ export default class App extends React.Component {
 
     const {hasDefault} = this.state
     if(hasDefault){
-
-      if(this.state.swipe){
-        return(<TinderSwipe method={this.changeSwipe}/>)
-      }else{
-        return (
+      return (
         <Swiper ref='swiper' loop={false} showsPagination={false} index={0} removeClippedSubviews={true}>
         <View style={{flex: 1}}>
           <Browser >
           </Browser>
         </View>
         <View style={{flex: 1}}>
-          <MediaComponent method={this.changeSwipe}>
+          <MediaComponent method={this.navigate}>
           </MediaComponent>
           </View>
       </Swiper>
       );
-    }
     }else{
       return (
       <View style={{flex: 1}}>
