@@ -8,6 +8,7 @@ import ConfigCamera from './components/configcamera';
 import MediaComponent from './components/media';
 import SignUpProcess from './components/signup'
 import SignInProcess from './components/signin'
+import Homepage from './components/homepage'
 import Browser from './components/browser';
 import Amplify, { API } from 'aws-amplify';
 
@@ -44,9 +45,12 @@ export default class App extends React.Component {
     this.state = {
       hasDefault: false,
       isLoggedIn: false,
+      isLoggedInNEW: false,
       signUp: false,
       loaded: false,
-      swipe: false
+      swipe: false,
+      seeLogInPage: false,
+      seeSignUpPage: false
     }
     this.configure = this.configure.bind(this);
     this.reconfigure = this.reconfigure.bind(this);
@@ -54,11 +58,26 @@ export default class App extends React.Component {
     this.needToSignUp = this.needToSignUp.bind(this);
     this.signOut = this.signOut.bind(this);
     this.changeSwipe = this.changeSwipe.bind(this);
+    this.logInPage = this.logInPage.bind(this);
+    this.signUpPage = this.signUpPage.bind(this);
+    this.homePage = this.homePage.bind(this);
+  }
+
+  logInPage(value) {
+    this.setState({ seeLogInPage: value, seeSignUpPage: !value});
+  }
+
+  signUpPage(value) {
+    this.setState({ seeLogInPage: !value, seeSignUpPage: value});
+  }
+
+  homePage() {
+    this.setState({ seeLogInPage: false, seeSignUpPage: false, isLoggedInNEW: false});
   }
 
   authenticate(isAuthenticated) {
     console.log('setting authentication to true');
-    this.setState({ isLoggedIn: isAuthenticated});
+    this.setState({ seeLogInPage: false, seeSignUpPage: false, isLoggedInNEW: true, isLoggedIn: isAuthenticated});
     this.registerForPush();
   }
 
@@ -106,6 +125,7 @@ export default class App extends React.Component {
     value = await AsyncStorage.getItem('user');
     if (value){
       this.setState({isLoggedIn: true});
+      this.setState({ seeLogInPage: false, seeSignUpPage: false, isLoggedInNEW: true});
       this.setState({loaded: true});
       this.registerForPush();
     }else{
@@ -140,25 +160,30 @@ export default class App extends React.Component {
   render() {
     if(!this.state.loaded)
       return(<View/>);
-    if(this.state.signUp) {
+    if(this.state.seeSignUpPage) {
       console.log('signup is true');
       return (
-        <SignUpProcess signUpAuth={this.needToSignUp}> </SignUpProcess>
+        <SignUpProcess signUpAuth={this.needToSignUp} homePage={this.homePage}> </SignUpProcess>
       )
     }
-    if(!this.state.isLoggedIn) {
+    if(this.state.seeLogInPage) {
       console.log('not logged in is true');
       return (
-        <SignInProcess signInAuth={this.authenticate} signUpAuth={this.needToSignUp}> </SignInProcess>
+        <SignInProcess signInAuth={this.authenticate} signUpAuth={this.needToSignUp} homePage={this.homePage}> </SignInProcess>
       )
+    }
+
+    if(!this.state.isLoggedInNEW) {
+      return (<Homepage logInPage={this.logInPage} signUpPage={this.signUpPage}/>)
     }
 
     const {hasDefault} = this.state
     if(hasDefault){
+
       if(this.state.swipe){
         return(<TinderSwipe method={this.changeSwipe}/>)
       }else{
-      return (
+        return (
         <Swiper ref='swiper' loop={false} showsPagination={false} index={0} removeClippedSubviews={true}>
         <View style={{flex: 1}}>
           <Browser >
@@ -172,7 +197,6 @@ export default class App extends React.Component {
       );
     }
     }else{
-
       return (
       <View style={{flex: 1}}>
           <ConfigCamera method={this.configure}> </ConfigCamera>
