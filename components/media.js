@@ -2,7 +2,7 @@ import React, {
   Component
 } from "react";
 import {View, Text, StyleSheet, CameraRoll, AsyncStorage, TouchableOpacity,
-  ImageBackground, Image, ScrollView, FlatList, Dimensions
+  ImageBackground, Image, ScrollView, FlatList, Dimensions, Animated
 } from "react-native";
 import { Camera, Permissions, Location, FileSystem, Notifications, Font} from 'expo'
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
@@ -11,20 +11,22 @@ import aws_exports from './../aws-exports';
 import { Container, Content, Icon, Header, Left, Body, Right, Segment, Button } from 'native-base'
 
 
+
 class MediaComponent extends Component{
 
 	constructor(props) {
     super(props);
-
     this.state = {
-      displayphotos: [],
       storedphotos: [],
       newPics: [],
       displayphoto: null,
-      displayindex: 1,
-    location: null,
+      location: null,
       intervalID: null,
-      fontLoaded: false
+      fontLoaded: false,
+      display0: [],
+      display1: [],
+      display2: [],
+      displayindex: 0
     }
 
     this.checkServer = this.checkServer.bind(this);
@@ -38,7 +40,6 @@ class MediaComponent extends Component{
     Font.loadAsync({
       'custom-font': require('./../assets/fonts/Molluca.ttf'),
     }).then(response => {this.setState({ fontLoaded: true })});
-
 
 
 	}
@@ -74,7 +75,7 @@ class MediaComponent extends Component{
         .then(async ({ uri }) => {
           console.log('Finished downloading to ', uri);
           Image.getSize(uri, (width, height) => {
-            this.setState({displayphotos: this.state.displayphotos.reverse().concat({key: uri, width: width, height: height}).reverse()});
+            this.storePhoto(uri, width, height);
           }, (error) => {
             console.error(`Couldn't get the image size: ${error.message}`);
           });
@@ -82,6 +83,20 @@ class MediaComponent extends Component{
       }
     }
   }
+
+  storePhoto(uri, width, height){
+    if(this.state.displayindex == 0){
+      this.setState({display0: this.state.display0.reverse().concat({key: uri, width: width, height: height}).reverse()});
+      this.setState({displayindex: 1})
+    }else if(this.state.displayindex == 1){
+      this.setState({display1: this.state.display1.reverse().concat({key: uri, width: width, height: height}).reverse()});
+      this.setState({displayindex: 2})
+    }else{
+      this.setState({display2: this.state.display2.reverse().concat({key: uri, width: width, height: height}).reverse()});
+      this.setState({displayindex: 0})
+    }
+  }
+
   async addBlacklist(uri){
     blacklist = await AsyncStorage.getItem('blacklist');
     if(!blacklist){
@@ -104,19 +119,37 @@ class MediaComponent extends Component{
     this.setState({storedphotos: this.state.storedphotos + blacklist});
   }
 
-
+  removePhoto(item){
+    //Unelegant
+    var index = this.state.display0.indexOf(item);
+    if (index > -1) {
+      this.state.display0.splice(index, 1);
+      this.setState({display0: this.state.display0});
+    }else{
+      index = this.state.display1.indexOf(item);
+      if (index > -1) {
+        this.state.display1.splice(index, 1)
+        this.setState({display1: this.state.display1});
+      }else{
+        index = this.state.display2.indexOf(item);
+        console.log(index)
+        if (index > -1) {
+          this.state.display2.splice(index, 1)
+          this.setState({display2: this.state.display2});
+        }
+      }
+    }
+  }
 	async save(item){
 		CameraRoll.saveToCameraRoll(item.key);
     this.addBlacklist(item.key)
-    var index = this.state.displayphotos.indexOf(item);
-    list = this.state.displayphotos
-    if (index > -1) {
-      this.state.displayphotos.splice(index, 1);
-    }
-    this.setState({displayphotos: list})
-
+    
+    this.removePhoto(item);
+    
+    
 	}
-  displayImage(item){
+
+  displayImage(item, list){
     return(
       <TouchableOpacity onPress={(e) => {this.save(item);}}>
       <Image source={{ uri: item.key}} style={{width: Dimensions.get('window').width/3, height: (item.height/item.width)*Dimensions.get('window').width/3}}/>
@@ -126,8 +159,7 @@ class MediaComponent extends Component{
 
 	render(){
 
-
-		if(this.state.displayphotos !== []){
+		if(this.state.display0 !== []){
     return(
       <Container style={styles.headcontainer}>
        <Header style={{ paddingLeft: 10, paddingLeft: 10 }}>
@@ -140,18 +172,25 @@ class MediaComponent extends Component{
         </Header>
     <View style={styles.wrapper}>
     <ScrollView contentContainerStyle={styles.container}>
-        <FlatList
-          data={this.state.displayphotos.filter((_,i) => i % 3 == 0)}
-          renderItem={({item}) => this.displayImage(item)}
-        />
-        <FlatList
-          data={this.state.displayphotos.filter((_,i) => i % 3 == 1)}
-          renderItem={({item}) =>  this.displayImage(item)}
-        />
-        <FlatList
-          data={this.state.displayphotos.filter((_,i) => i % 3 == 2)}
-          renderItem={({item}) => this.displayImage(item)}
-        />
+          {this.state.display0.length !== 0 ?
+              <FlatList
+                data={this.state.display0}
+                renderItem={({item}) => this.displayImage(item)}/>
+            : <View style={{width: Dimensions.get('window').width/3}}/>
+          }
+              
+          {this.state.display1.length !== 0 ?
+              <FlatList
+                data={this.state.display1}
+                renderItem={({item}) => this.displayImage(item)}/>
+            : <View style={{width: Dimensions.get('window').width/3}}/>
+          }
+           {this.state.display2.length !== 0 ?
+              <FlatList
+                data={this.state.display2}
+                renderItem={({item}) => this.displayImage(item)}/>
+            : <View style={{width: Dimensions.get('window').width/3}}/>
+          }
     </ScrollView>
 </View>
 </Container>
@@ -207,6 +246,7 @@ list: {
     textAlign: 'center',
     paddingTop: 10,}
 });
+
 
 export default MediaComponent
 

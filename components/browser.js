@@ -36,7 +36,11 @@ constructor(props){
       cursor: 0,
       apiResponse: null,
       noteId: '',
-      blackphotos: []
+      blackphotos: [],
+      display0: [],
+      display1: [],
+      display2: [],
+      displayindex: 0
     };
 }
  handleChangeNoteId = (event) => {
@@ -88,14 +92,44 @@ sendPicture = async (item) => {
     })
   }).catch(e => {console.log("error fetching from phone disk: " + e)})
   this.addBlacklist(item.photo);
-  var index = this.state.media.indexOf(item);
-    list = this.state.media
-    if (index > -1) {
-      this.state.media.splice(index, 1);
-    }
-    this.setState({media: list})
+  this.removePhoto(item);
 
 }
+
+removePhoto(item){
+    //Unelegant
+    var index = this.state.display0.indexOf(item);
+    if (index > -1) {
+      this.state.display0.splice(index, 1);
+      this.setState({display0: this.state.display0});
+    }else{
+      index = this.state.display1.indexOf(item);
+      if (index > -1) {
+        this.state.display1.splice(index, 1)
+        this.setState({display1: this.state.display1});
+      }else{
+        index = this.state.display2.indexOf(item);
+        if (index > -1) {
+          this.state.display2.splice(index, 1)
+          this.setState({display2: this.state.display2});
+        }
+      }
+    }
+  }
+
+storePhoto(photo){
+    if(this.state.displayindex == 0){
+      this.setState({display0: this.state.display0.reverse().concat(photo).reverse()});
+      this.setState({displayindex: 1})
+    }else if(this.state.displayindex == 1){
+      this.setState({display1: this.state.display1.reverse().concat(photo).reverse()});
+      this.setState({displayindex: 2})
+    }else{
+      this.setState({display2: this.state.display2.reverse().concat(photo).reverse()});
+      this.setState({displayindex: 0})
+    }
+  }
+
 loadphotos(howmany){
   CameraRoll.getPhotos({
   first: howmany + this.state.cursor,
@@ -105,14 +139,15 @@ loadphotos(howmany){
     const media = this.state.media;
     data.edges.forEach((d, i) =>
       {if(i >= this.state.cursor && !this.state.blackphotos.includes(d.node.image.uri)){
-      media.push({
+      
+      this.storePhoto({
         photo: d.node.image.uri,
         key: d.node.image.uri,
         width: d.node.image.width,
         height: d.node.image.height,
       })}},
     );
-    this.setState({media: media, cursor: this.state.cursor + howmany});
+    this.setState({cursor: this.state.cursor + howmany});
   })
   .catch(error => alert(error));
 }
@@ -123,7 +158,7 @@ load(){
 displayImage(item){
   return(
     <TouchableOpacity onPress={(e) => {this.sendPicture(item);}}>
-    <Image source={{ uri: item.photo}} style={{width: Dimensions.get('window').width/3, height: (item.height/item.width)*Dimensions.get('window').width/3}}/>
+      <Image source={{ uri: item.photo}} style={{width: Dimensions.get('window').width/3, height: (item.height/item.width)*Dimensions.get('window').width/3}}/>
     </TouchableOpacity>
     )
 }
@@ -151,16 +186,9 @@ async addBlacklist(uri){
 
 
   render() {
-    if(this.state.media !== []){
     return(
       <Container style={styles.headcontainer}>
        <Header style={{ paddingLeft: 10, paddingLeft: 10 }}>
-                    <Left>
-                        <Text>md-person-add</Text>
-                    </Left>
-                    <Right>
-                        <Text>md-person-add</Text>
-                    </Right>
         </Header>
     <View style={styles.wrapper}>
     <ScrollView contentContainerStyle={styles.container}
@@ -170,23 +198,29 @@ async addBlacklist(uri){
       }
     }}
     scrollEventThrottle={400}>
+    {this.state.display0.length !== 0 ?
         <FlatList
-  data={this.state.media.filter((_,i) => i % 3 == 0)}
-  renderItem={({item}) => this.displayImage(item)}/>
+          data={this.state.display0}
+          renderItem={({item}) => this.displayImage(item)}/>
+      : <View style={{width: Dimensions.get('window').width/3}}/>
+    }
+        
+    {this.state.display1.length !== 0 ?
         <FlatList
-  data={this.state.media.filter((_,i) => i % 3 == 1)}
-  renderItem={({item}) =>  this.displayImage(item)}/>
+          data={this.state.display1}
+          renderItem={({item}) => this.displayImage(item)}/>
+      : <View style={{width: Dimensions.get('window').width/3}}/>
+    }
+     {this.state.display2.length !== 0 ?
         <FlatList
-  data={this.state.media.filter((_,i) => i % 3 == 2)}
-  renderItem={({item}) =>  this.displayImage(item)}
-/>
+          data={this.state.display2}
+          renderItem={({item}) => this.displayImage(item)}/>
+      : <View style={{width: Dimensions.get('window').width/3}}/>
+    }
     </ScrollView>
 </View>
 </Container>
-)}else{
-      return(
-      <View/>)
-    }
+)
 
   }
 }
