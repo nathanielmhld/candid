@@ -15,7 +15,9 @@ class MediaComponent extends Component{
 
 	constructor(props) {
     super(props);
-
+    this.signOut = this.signOut.bind(this);
+    this.back = this.back.bind(this);
+    this.reconfig = this.reconfig.bind(this);
     this.state = {
     }
 
@@ -34,6 +36,9 @@ class MediaComponent extends Component{
   reconfig(){
     this.props.method("reconfig");
   }
+  back(){
+    this.props.method("");
+  }
 
 
 	render(){
@@ -51,7 +56,16 @@ class MediaComponent extends Component{
       action: this.reconfig
     }
     ]
-    return(<List>
+    return(
+      <Container style={styles.headcontainer}>
+       <Header style={{ paddingLeft: 10, paddingLeft: 10 }}>
+                    <Left>
+                        <TouchableOpacity onPress={this.back}>
+                          <Ionicons name="ios-arrow-back" style={{color:'black', fontSize: 30}}>
+                          </Ionicons>
+                        </TouchableOpacity>
+                    </Left>
+        </Header>
       <FlatList
         data={settingData}
         renderItem={({ item }) => (
@@ -62,10 +76,8 @@ class MediaComponent extends Component{
             hideChevron
           />
         )}
-        keyExtractor={item => item.key}
       />
-    </List>)
-
+    </Container>)
 	}
 }
 
