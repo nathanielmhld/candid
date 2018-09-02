@@ -1,7 +1,8 @@
 import React from 'react';
-import {TextInput, Button, StyleSheet, Text, View, AsyncStorage } from 'react-native';
+import {TextInput, Button, StyleSheet, Text, View, AsyncStorage, TouchableHighlight, TouchableOpacity, KeyboardAvoidingView, ScrollView} from 'react-native';
 import {Auth} from 'aws-amplify';
 import {Font} from 'expo';
+import { MaterialCommunityIcons, Octicons } from '@expo/vector-icons';
 
 export default class SignInProcess extends React.Component {
 
@@ -15,6 +16,10 @@ export default class SignInProcess extends React.Component {
       fontLoaded: false,
       issue: null
     }
+  }
+
+  homePageJump() {
+    this.props.homePage();
   }
 
   onChangeText(key, value) {
@@ -37,53 +42,102 @@ export default class SignInProcess extends React.Component {
 
   componentDidMount() {
     Font.loadAsync({
-      'custom-font': require('./../assets/fonts/Molluca.ttf'),
+      'custom-font': require('./../assets/fonts/Roboto-Bold.ttf'),
     }).then(response => {this.setState({ fontLoaded: true });});
   }
 
   render() {
     return (
-      <View style={styles.container}>
-        {this.state.fontLoaded ? (
-          <Text style={styles.text}>Candid</Text>) : null
-        }
-        {this.state.issue ? (
-          <Text style={styles.issue}>{this.state.issue}</Text>) : null
-        }
-        <TextInput
-          onChangeText={value => this.onChangeText('username', value)}
-          style={styles.input}
-          placeholder='username'
-        />
-        <TextInput
-          onChangeText={value => this.onChangeText('password', value)}
-          style={styles.input}
-          secureTextEntry={true}
-          placeholder='password'
-        />
-        <Button buttonStyle={styles.loginButton} title="Login Now" onPress={this.signIn.bind(this)}  />
-        <Button title="Sign Up" onPress={this.signUpNow.bind(this)} />
-      </View>
+      <KeyboardAvoidingView style={styles.container} behavior="padding" enabled>
+        <ScrollView>
+          <View style={styles.header}>
+              <View>
+              <TouchableOpacity onPress={this.props.homePage}>
+                <MaterialCommunityIcons name="arrow-left" style={{color:'#21ce99', fontSize: 35}}></MaterialCommunityIcons>
+                </TouchableOpacity>
+              </View>
+              <View>
+                {this.state.fontLoaded ? (
+                  <Text style={styles.text}>Sign In</Text>) : null
+                }
+              </View>
+            </View>
+          <View style={{flexDirection:'column'}}>
+            {this.state.issue ? (
+              <Text style={styles.issue}>{this.state.issue}</Text>) : null
+            }
+            <View style={styles.inputView}>
+              <Text style={styles.inputText}>Phone number or username</Text>
+            </View>
+            <TextInput
+              onChangeText={value => this.onChangeText('username', value)}
+              style={styles.input}
+            />
+            <View style={styles.inputView}>
+              <Text style={styles.inputText}>Password</Text>
+            </View>
+            <View>
+              <TextInput
+                onChangeText={value => this.onChangeText('password', value)}
+                style={styles.input}
+                secureTextEntry={true}
+              />
+            </View>
+            <View style={styles.inputView}>
+              <Text style={{color: '#21ce99', textAlign: 'left'}}>Forgot your password?</Text>
+            </View>
+        </View>
+      </ScrollView>
+        <View style={styles.viewLoginButton}>
+          <TouchableHighlight style={styles.loginButton} onPress={this.signIn.bind(this)} underlayColor='#21ce99'>
+            <Text style={styles.textContainer}>Login</Text>
+          </TouchableHighlight>
+        </View>
+      </KeyboardAvoidingView>
     );
   }
 }
 
 const styles = StyleSheet.create({
+  header: {
+    marginTop: 40,
+    marginBottom: 20,
+    flexDirection:'row',
+    marginLeft: 20
+  },
+  inputView: {
+    marginLeft: 25
+  },
+  inputText: {
+    color: 'grey'
+  },
+  signInView: {
+    marginTop: 20,
+    marginBottom: 20
+  },
+  textContainer: {
+    height: 45,
+    lineHeight: 45,
+    textAlign: 'center',
+    fontWeight: 'bold',
+    color: "white"
+  },
   input: {
     height: 50,
-    borderBottomWidth: 2,
-    borderBottomColor: '#2196F3',
-    margin: 10,
     marginLeft: 25,
     marginRight: 25
   },
   loginButton: {
-    backgroundColor: "rgba(92, 99,216, 1)",
-    width: 300,
+    backgroundColor: "#21ce99",
     height: 45,
     borderColor: "transparent",
     borderWidth: 0,
-    borderRadius: 5
+    borderRadius: 0,
+  },
+  viewLoginButton: {
+    marginLeft: 25,
+    marginRight: 25,
+    marginBottom: 20
   },
   container: {
     flex: 1,
@@ -92,11 +146,11 @@ const styles = StyleSheet.create({
   },
   text: {
     color: 'black',
-    fontSize: 50,
+    fontSize: 35,
     fontFamily: 'custom-font',
     //fontWeight: 'bold',
     textAlign: 'center',
-    paddingTop: 10,
+    width: 250
   },
   issue: {
     color: 'red',
