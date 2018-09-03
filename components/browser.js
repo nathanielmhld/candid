@@ -14,6 +14,7 @@ import {
   Dimensions,
   RefreshControl,
   AsyncStorage,
+  Animated
 } from 'react-native';
 import { Container, Content, Icon, Header, Left, Body, Right, Segment, Button } from 'native-base'
 import { API, Storage } from 'aws-amplify';
@@ -31,6 +32,7 @@ state = {media: []}
 constructor(props){
   super(props);
   this.state = {
+      opacity: new Animated.Value(1),
       refreshing: false,
       media: [],
       cursor: 0,
@@ -47,6 +49,7 @@ constructor(props){
     this.setState({noteId: event});
   };
 componentDidMount(){
+  this.views = {};
   this.getBlacklist()
   this.loadphotos(50);
 
@@ -155,11 +158,26 @@ loadphotos(howmany){
 load(){
   this.loadphotos(50)
 }
+selectedImage(item){
+  this.views[item.key].setNativeProps({opacity: opacity});
+  Animated.timing(
+        this.state.opacity,
+        {
+          toValue: .5,
+          duration: 10000,
+        }
+      ).start(); 
+  
+  
+}
 displayImage(item){
+  opacity = this.state.opacity
   return(
-    <TouchableOpacity onPress={(e) => {this.sendPicture(item);}}>
+    <Animated.View ref={component => this.views[item.key] = component}>
+    <TouchableOpacity onPress={(e) => {this.selectedImage(item);}}>
       <Image source={{ uri: item.photo}} style={{width: Dimensions.get('window').width/3, height: (item.height/item.width)*Dimensions.get('window').width/3}}/>
     </TouchableOpacity>
+    </Animated.View>
     )
 }
 async addBlacklist(uri){
