@@ -6,6 +6,7 @@ import {
   ScrollView,
   Platform,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   Text,
   View,
   StyleSheet,
@@ -16,8 +17,10 @@ import {
   AsyncStorage,
   Animated
 } from 'react-native';
+import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { Container, Content, Icon, Header, Left, Body, Right, Segment, Button } from 'native-base'
 import { API, Storage } from 'aws-amplify';
+import ImageTile from './imagetile'
 
 const isCloseToBottom = ({layoutMeasurement, contentOffset, contentSize}) => {
   const paddingToBottom = 20;
@@ -42,7 +45,8 @@ constructor(props){
       display0: [],
       display1: [],
       display2: [],
-      displayindex: 0
+      displayindex: 0,
+      browsertutorial: true
     };
 }
  handleChangeNoteId = (event) => {
@@ -159,25 +163,12 @@ load(){
   this.loadphotos(50)
 }
 selectedImage(item){
-  this.views[item.key].setNativeProps({opacity: opacity});
-  Animated.timing(
-        this.state.opacity,
-        {
-          toValue: .5,
-          duration: 10000,
-        }
-      ).start(); 
-  
-  
+  this.views[item.key].setNativeProps({opacity: .5});
 }
 displayImage(item){
   opacity = this.state.opacity
   return(
-    <Animated.View ref={component => this.views[item.key] = component}>
-    <TouchableOpacity onPress={(e) => {this.selectedImage(item);}}>
-      <Image source={{ uri: item.photo}} style={{width: Dimensions.get('window').width/3, height: (item.height/item.width)*Dimensions.get('window').width/3}}/>
-    </TouchableOpacity>
-    </Animated.View>
+    <ImageTile item={item}></ImageTile>
     )
 }
 async addBlacklist(uri){
@@ -206,7 +197,29 @@ async addBlacklist(uri){
   render() {
     return(
       <Container style={styles.headcontainer}>
+      {this.state.browsertutorial === true ?
+      <TouchableOpacity onPress={(e) => {this.setState({browsertutorial: false});}} style={{
+
+    width: Dimensions.get('window').width - 50,
+    height: Dimensions.get('window').height - 50,
+    top: 30,
+    left: 30,
+    backgroundColor: 'black',
+    borderRadius: 20,
+    zIndex: 2, 
+    position: "absolute",
+    opacity: .8,
+    alignItems:'center',
+    justifyContent: "center"
+  }}>
+      <MaterialCommunityIcons name="arrow-up-bold-circle-outline" style={{color:'white', fontSize: 200}}/>
+      <Text style={{color:'white', fontSize: 40, textAlign: "center"}}>Tap a picture to set it free! {"\n"} It will be sent to whoever's in it</Text>
+      </TouchableOpacity>
+      : null}
        <Header style={{ paddingLeft: 10, paddingLeft: 10 }}>
+          <Body style={{alignItems:'center', justifyContent: "center"}}>
+            <MaterialCommunityIcons name="arrow-up-bold-circle-outline" style={{color:'black', fontSize: 30}}/>
+          </Body>
         </Header>
     <View style={styles.wrapper}>
     <ScrollView contentContainerStyle={styles.container}

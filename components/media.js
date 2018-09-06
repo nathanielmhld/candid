@@ -26,7 +26,8 @@ class MediaComponent extends Component{
       display0: [],
       display1: [],
       display2: [],
-      displayindex: 0
+      displayindex: 0,
+      mediatutorial: true
     }
 
     this.checkServer = this.checkServer.bind(this);
@@ -161,8 +162,32 @@ class MediaComponent extends Component{
 
 		if(this.state.display0 !== []){
     return(
+      
       <Container style={styles.headcontainer}>
+      {this.state.mediatutorial === true ?
+      <TouchableOpacity onPress={(e) => {this.setState({mediatutorial: false});}} style={{
+
+    width: Dimensions.get('window').width - 50,
+    height: Dimensions.get('window').height - 50,
+    top: 30,
+    left: 30,
+    backgroundColor: 'black',
+    borderRadius: 20,
+    zIndex: 2, 
+    position: "absolute",
+    opacity: .8,
+    alignItems:'center',
+    justifyContent: "center"
+  }}>
+      <MaterialCommunityIcons name="arrow-down-bold-circle-outline" style={{color:'white', fontSize: 200}}/>
+      <Text style={{color:'white', fontSize: 40, textAlign: "center"}}>Tap a picture to download it!</Text>
+      </TouchableOpacity>
+      : null}
        <Header style={{ paddingLeft: 10, paddingLeft: 10 }}>
+                    <Left></Left>
+                    <Body style={{alignItems:'center', justifyContent: "center"}}>
+                      <MaterialCommunityIcons name="arrow-down-bold-circle-outline" style={{color:'black', fontSize: 30}}/>
+                    </Body>
                     <Right>
                         <TouchableOpacity onPress={(e) => {this.props.method('settings');}}>
                           <Ionicons name="ios-more" style={{color:'black', fontSize: 30}}>
