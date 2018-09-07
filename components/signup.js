@@ -3,6 +3,7 @@ import {TextInput, Button, StyleSheet, Text, View, TouchableHighlight, Touchable
 import {Auth} from 'aws-amplify';
 import {Font} from 'expo';
 import { MaterialCommunityIcons, Octicons } from '@expo/vector-icons';
+import SignUpName from './signupName';
 
 
 export default class SignUpProcess extends React.Component {
@@ -15,7 +16,13 @@ export default class SignUpProcess extends React.Component {
       email: '',
       user: {},
       fontLoaded: false,
-      issue: null
+      passwordIssue: false,
+      phoneIssue: false,
+      loginEnabled: false,
+      loginStyle: {},
+      loginHighlightColor: '',
+      inputStyle: {},
+      phoneInputStyle:{}
     }
   }
 
@@ -23,6 +30,35 @@ export default class SignUpProcess extends React.Component {
     this.props.homePage();
   }
   onChangeText(key, value) {
+
+    if(key === 'password') {
+      if(value.length < 6) {
+        this.setState({
+          'passwordIssue': true
+        })
+      } else {
+        this.setState({
+          'passwordIssue': false
+        })
+      }
+    }
+    if(key === 'username') {
+      var phoneno = /^\d{10}$/;
+      var phoneno1 = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
+      var phoneno2 = /^\+?([0-9]{2})\)?[-. ]?([0-9]{4})[-. ]?([0-9]{4})$/;
+      var phoneno3 = /^\+1\d{101`````````````````````````````````````````````````````````````````````````````````````````````````}$/;
+
+      if(phoneno.test(value) || phoneno1.test(value) || phoneno2.test(value) || phoneno3.test(value)) {
+        this.setState({
+          'phoneIssue': false
+        })
+      } else {
+        this.setState({
+          'phoneIssue': true
+        })
+      }
+    }
+
     this.setState({
       [key]: value
     })
@@ -64,6 +100,25 @@ export default class SignUpProcess extends React.Component {
   }
 
   render() {
+    if(this.state.username && this.state.password && this.state.email && !this.state.passwordIssue && !this.state.phoneIssue) {
+      this.state.loginEnabled = false;
+      this.state.loginStyle = styles.loginButton;
+      this.state.loginHighlightColor = "#21ce99";
+    } else {
+      this.state.loginEnabled = true;
+      this.state.loginStyle = styles.disabledLoginButton;
+      this.state.loginHighlightColor = "grey";
+      if(this.state.passwordIssue) {
+        this.state.inputStyle = styles.inputError;
+      } else {
+        this.state.inputStyle = styles.input;
+      }
+      if(this.state.phoneIssue) {
+        this.state.phoneInputStyle = styles.inputError;
+      } else {
+        this.state.phoneInputStyle = styles.input;
+      }
+    }
     return (
       <KeyboardAvoidingView style={styles.container} behavior="padding" enabled>
         <ScrollView>
@@ -80,11 +135,8 @@ export default class SignUpProcess extends React.Component {
               </View>
             </View>
           <View style={{flexDirection:'column'}}>
-            {this.state.issue ? (
-              <Text style={styles.issue}>{this.state.issue}</Text>) : null
-            }
             <View style={styles.inputView}>
-              <Text style={styles.inputText}>Username</Text>
+              <Text style={styles.inputText}>Name</Text>
             </View>
             <TextInput
               onChangeText={value => this.onChangeText('email', value)}
@@ -96,25 +148,32 @@ export default class SignUpProcess extends React.Component {
             <TextInput
               keyboardType={'phone-pad'}
               onChangeText={value => this.onChangeText('username', value)}
-              style={styles.input}
+              style={this.state.phoneInputStyle}
             />
+            {this.state.phoneIssue ? (
+              <Text style={styles.issue}>Please enter a valid phone number.</Text>) : null
+            }
             <View style={styles.inputView}>
               <Text style={styles.inputText}>Password</Text>
             </View>
+
             <View>
-              <TextInput
+              <TextInput underlineColorAndroid={'transparent'}
                 onChangeText={value => this.onChangeText('password', value)}
-                style={styles.input}
+                style={this.state.inputStyle}
                 secureTextEntry={true}
               />
             </View>
+            {this.state.passwordIssue ? (
+              <Text style={styles.issue}>Password must be longer than 6 characters.</Text>) : null
+            }
             <View style={styles.inputView}>
-              <Text> By signing up, you agree to the <Text style={{color: '#21ce99', textAlign: 'left'}}>Terms and Conditions</Text> and <Text style={{color: '#21ce99', textAlign: 'left'}}>Private Policy</Text>. </Text>
+              <Text style={{textAlign: 'right'}}> By signing up, you agree to the <Text style={{color: '#21ce99'}}>Terms and Conditions</Text> and <Text style={{color: '#21ce99', textAlign: 'left'}}>Private Policy</Text>. </Text>
             </View>
         </View>
       </ScrollView>
         <View style={styles.viewLoginButton}>
-          <TouchableHighlight style={styles.loginButton} onPress={this.signUp.bind(this)} underlayColor='#21ce99'>
+          <TouchableHighlight disabled={this.state.loginEnabled} style={this.state.loginStyle} onPress={this.signUp.bind(this)} underlayColor={this.state.loginHighlightColor}>
             <Text style={styles.textContainer}>Sign Up</Text>
           </TouchableHighlight>
         </View>
@@ -132,7 +191,9 @@ const styles = StyleSheet.create({
   },
   inputView: {
     marginLeft: 25,
-    marginRight: 25
+    marginRight: 25,
+    marginTop: 25,
+    marginBottom: 10
   },
   inputText: {
     color: 'grey'
@@ -149,12 +210,30 @@ const styles = StyleSheet.create({
     color: "white"
   },
   input: {
-    height: 50,
     marginLeft: 25,
-    marginRight: 25
+    marginRight: 25,
+    borderBottomColor: 'black',
+    borderBottomWidth: 1,
+    paddingBottom: 0,
+    paddingHorizontal: 0
+  },
+  inputError: {
+    marginLeft: 25,
+    marginRight: 25,
+    borderBottomColor: 'red',
+    borderBottomWidth: 1,
+    paddingBottom: 0,
+    paddingHorizontal: 0
   },
   loginButton: {
     backgroundColor: "#21ce99",
+    height: 45,
+    borderColor: "transparent",
+    borderWidth: 0,
+    borderRadius: 0,
+  },
+  disabledLoginButton: {
+    backgroundColor: "grey",
     height: 45,
     borderColor: "transparent",
     borderWidth: 0,
@@ -175,8 +254,8 @@ const styles = StyleSheet.create({
     fontSize: 35,
     fontFamily: 'custom-font',
     //fontWeight: 'bold',
-    textAlign: 'center',
-    width: 250
+    textAlign: 'right',
+    width: 275
   },
   issue: {
     color: 'red',
