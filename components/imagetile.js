@@ -42,7 +42,11 @@ export default class ImageTile extends Component {
       this.state.sendanimation, // The value to drive
       {toValue: 0,
       friction: 10} // Configuration
-      ).start();
+      ).start(
+      this.props.parentSelect(null),
+      this.setState({sent: true}),
+      this.props.action(this.props.item)
+      );
       Animated.timing(
       // Uses easing functions
       this.state.selectanimation, // The value to drive
@@ -53,9 +57,7 @@ export default class ImageTile extends Component {
       this.state.arrowanimation, // The value to drive
       {toValue: 0} // Configuration
     ).start();
-      this.props.parentSelect(null);
-      this.setState({sent: true});
-      this.props.action(this.props.item);
+      
     }else if(this.props.parentSelect(this.imageUnSelected)){
       Animated.timing(
       // Uses easing functions
