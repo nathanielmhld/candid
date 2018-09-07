@@ -5,11 +5,11 @@ import {View, Text, StyleSheet, CameraRoll, AsyncStorage, TouchableOpacity,
   ImageBackground, Image, ScrollView, FlatList, Dimensions, Animated
 } from "react-native";
 import { Camera, Permissions, Location, FileSystem, Notifications, Font} from 'expo'
-import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
+import { Entypo, Ionicons } from '@expo/vector-icons';
 import Amplify, { Storage, API } from 'aws-amplify';
 import aws_exports from './../aws-exports';
 import { Container, Content, Icon, Header, Left, Body, Right, Segment, Button } from 'native-base'
-
+import ImageTile from './imagetile'
 
 
 class MediaComponent extends Component{
@@ -27,11 +27,26 @@ class MediaComponent extends Component{
       display1: [],
       display2: [],
       displayindex: 0,
-      mediatutorial: true
+      mediatutorial: false,
+      childSelect: null
     }
 
     this.checkServer = this.checkServer.bind(this);
     }
+
+parentSelected(childSelected){
+    if(childSelected == null){
+      this.setState({childSelect: null})
+      return false
+    }else if(this.state.childSelect == null){
+      this.setState({childSelect: childSelected})
+      return true
+    }else{
+      this.state.childSelect();
+      this.setState({childSelect: null})
+      return false
+    }
+  }
 
   async componentDidMount() {
     this.getBlacklist();
@@ -87,13 +102,13 @@ class MediaComponent extends Component{
 
   storePhoto(uri, width, height){
     if(this.state.displayindex == 0){
-      this.setState({display0: this.state.display0.reverse().concat({key: uri, width: width, height: height}).reverse()});
+      this.setState({display0: this.state.display0.reverse().concat({photo: uri, key: uri, width: width, height: height}).reverse()});
       this.setState({displayindex: 1})
     }else if(this.state.displayindex == 1){
-      this.setState({display1: this.state.display1.reverse().concat({key: uri, width: width, height: height}).reverse()});
+      this.setState({display1: this.state.display1.reverse().concat({photo: uri, key: uri, width: width, height: height}).reverse()});
       this.setState({displayindex: 2})
     }else{
-      this.setState({display2: this.state.display2.reverse().concat({key: uri, width: width, height: height}).reverse()});
+      this.setState({display2: this.state.display2.reverse().concat({photo: uri, key: uri, width: width, height: height}).reverse()});
       this.setState({displayindex: 0})
     }
   }
@@ -150,12 +165,13 @@ class MediaComponent extends Component{
     
 	}
 
-  displayImage(item, list){
-    return(
-      <TouchableOpacity onPress={(e) => {this.save(item);}}>
-      <Image source={{ uri: item.key}} style={{width: Dimensions.get('window').width/3, height: (item.height/item.width)*Dimensions.get('window').width/3}}/>
-      </TouchableOpacity>
-      )
+  displayImage(item){
+      return(
+    <ImageTile item={item} icon={"chevron-thin-down"} 
+    parentSelected={this.parentSelected}
+    action={this.save}></ImageTile>
+  )
+      
   }
 
 	render(){
@@ -179,18 +195,18 @@ class MediaComponent extends Component{
     alignItems:'center',
     justifyContent: "center"
   }}>
-      <MaterialCommunityIcons name="arrow-down-bold-circle-outline" style={{color:'white', fontSize: 200}}/>
+      <Entypo name="chevron-thin-down" style={{color:'white', fontSize: 200}}/>
       <Text style={{color:'white', fontSize: 40, textAlign: "center"}}>Tap a picture to download it!</Text>
       </TouchableOpacity>
       : null}
-       <Header style={{ paddingLeft: 10, paddingLeft: 10 }}>
+       <Header style={{ paddingLeft: 10, paddingLeft: 10, backgroundColor:'#21ce99'}}>
                     <Left></Left>
                     <Body style={{alignItems:'center', justifyContent: "center"}}>
-                      <MaterialCommunityIcons name="arrow-down-bold-circle-outline" style={{color:'black', fontSize: 30}}/>
+                      <Entypo name="chevron-thin-down" style={{color:'white', fontSize: 30}}/>
                     </Body>
                     <Right>
                         <TouchableOpacity onPress={(e) => {this.props.method('settings');}}>
-                          <Ionicons name="ios-more" style={{color:'black', fontSize: 30}}>
+                          <Ionicons name="ios-more" style={{color:'white', fontSize: 30}}>
                           </Ionicons>
                         </TouchableOpacity>
                     </Right>

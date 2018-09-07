@@ -17,7 +17,7 @@ import {
   AsyncStorage,
   Animated
 } from 'react-native';
-import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
+import { Entypo, Ionicons } from '@expo/vector-icons';
 import { Container, Content, Icon, Header, Left, Body, Right, Segment, Button } from 'native-base'
 import { API, Storage } from 'aws-amplify';
 import ImageTile from './imagetile'
@@ -46,8 +46,10 @@ constructor(props){
       display1: [],
       display2: [],
       displayindex: 0,
-      browsertutorial: true
+      browsertutorial: false,
+      childSelect: null
     };
+  this.parentSelected = this.parentSelected.bind(this);
 }
  handleChangeNoteId = (event) => {
     this.setState({noteId: event});
@@ -59,6 +61,22 @@ componentDidMount(){
 
 // fill 'Library photos' example with local media
 }
+
+parentSelected(childSelected){
+    if(childSelected == null){
+      this.setState({childSelect: null})
+      return false
+    }else if(this.state.childSelect == null){
+      this.setState({childSelect: childSelected})
+      return true
+    }else{
+      this.state.childSelect();
+      this.setState({childSelect: null})
+      return false
+    }
+  }
+
+
 sendPicture = async (item) => {
   var time0 = Date.now();
   var time = new Date().getTime();
@@ -162,14 +180,13 @@ loadphotos(howmany){
 load(){
   this.loadphotos(50)
 }
-selectedImage(item){
-  this.views[item.key].setNativeProps({opacity: .5});
-}
+
 displayImage(item){
-  opacity = this.state.opacity
   return(
-    <ImageTile item={item}></ImageTile>
-    )
+    <ImageTile item={item} icon={"chevron-thin-up"}
+    parentSelect={this.parentSelected}
+    action={this.sendPicture}></ImageTile>
+  )
 }
 async addBlacklist(uri){
     blacklist = await AsyncStorage.getItem('blacklist');
@@ -194,6 +211,7 @@ async addBlacklist(uri){
   }
 
 
+
   render() {
     return(
       <Container style={styles.headcontainer}>
@@ -212,13 +230,13 @@ async addBlacklist(uri){
     alignItems:'center',
     justifyContent: "center"
   }}>
-      <MaterialCommunityIcons name="arrow-up-bold-circle-outline" style={{color:'white', fontSize: 200}}/>
+      <Entypo name="chevron-thin-up" style={{color:'white', fontSize: 200}}/>
       <Text style={{color:'white', fontSize: 40, textAlign: "center"}}>Tap a picture to set it free! {"\n"} It will be sent to whoever's in it</Text>
       </TouchableOpacity>
       : null}
-       <Header style={{ paddingLeft: 10, paddingLeft: 10 }}>
+       <Header style={{ paddingLeft: 10, paddingLeft: 10, backgroundColor:'#21ce99'}}>
           <Body style={{alignItems:'center', justifyContent: "center"}}>
-            <MaterialCommunityIcons name="arrow-up-bold-circle-outline" style={{color:'black', fontSize: 30}}/>
+            <Entypo name="chevron-thin-up" style={{color:'white', fontSize: 30}}/>
           </Body>
         </Header>
     <View style={styles.wrapper}>
