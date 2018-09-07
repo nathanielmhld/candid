@@ -39,6 +39,9 @@ class MediaComponent extends Component{
   back(){
     this.props.method("");
   }
+  clearBlacklist(){
+    AsyncStorage.removeItem('blacklist');
+  }
 
 
 	render(){
@@ -54,6 +57,12 @@ class MediaComponent extends Component{
       title: "Re-ID me",
       subtitle: "Use a new picture of yourself",
       action: this.reconfig
+    },
+    {
+      key: 3,
+      title: "Clear local cache",
+      subtitle: "Resets our data on what pictures you've seen",
+      action: this.clearBlacklist
     }
     ]
     return(

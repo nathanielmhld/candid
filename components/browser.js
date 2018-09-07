@@ -6,6 +6,7 @@ import {
   ScrollView,
   Platform,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   Text,
   View,
   StyleSheet,
@@ -14,9 +15,12 @@ import {
   Dimensions,
   RefreshControl,
   AsyncStorage,
+  Animated
 } from 'react-native';
+import { Entypo, Ionicons } from '@expo/vector-icons';
 import { Container, Content, Icon, Header, Left, Body, Right, Segment, Button } from 'native-base'
 import { API, Storage } from 'aws-amplify';
+import ImageTile from './imagetile'
 
 const isCloseToBottom = ({layoutMeasurement, contentOffset, contentSize}) => {
   const paddingToBottom = 20;
@@ -31,23 +35,48 @@ state = {media: []}
 constructor(props){
   super(props);
   this.state = {
+      opacity: new Animated.Value(1),
       refreshing: false,
       media: [],
       cursor: 0,
       apiResponse: null,
       noteId: '',
-      blackphotos: []
+      blackphotos: [],
+      display0: [],
+      display1: [],
+      display2: [],
+      displayindex: 0,
+      browsertutorial: false,
+      childSelect: null
     };
+  this.parentSelected = this.parentSelected.bind(this);
 }
  handleChangeNoteId = (event) => {
     this.setState({noteId: event});
   };
 componentDidMount(){
+  this.views = {};
   this.getBlacklist()
   this.loadphotos(50);
 
 // fill 'Library photos' example with local media
 }
+
+parentSelected(childSelected){
+    if(childSelected == null){
+      this.setState({childSelect: null})
+      return false
+    }else if(this.state.childSelect == null){
+      this.setState({childSelect: childSelected})
+      return true
+    }else{
+      this.state.childSelect();
+      this.setState({childSelect: null})
+      return false
+    }
+  }
+
+
 sendPicture = async (item) => {
   var time0 = Date.now();
   var time = new Date().getTime();
@@ -88,14 +117,44 @@ sendPicture = async (item) => {
     })
   }).catch(e => {console.log("error fetching from phone disk: " + e)})
   this.addBlacklist(item.photo);
-  var index = this.state.media.indexOf(item);
-    list = this.state.media
-    if (index > -1) {
-      this.state.media.splice(index, 1);
-    }
-    this.setState({media: list})
+  this.removePhoto(item);
 
 }
+
+removePhoto(item){
+    //Unelegant
+    var index = this.state.display0.indexOf(item);
+    if (index > -1) {
+      this.state.display0.splice(index, 1);
+      this.setState({display0: this.state.display0});
+    }else{
+      index = this.state.display1.indexOf(item);
+      if (index > -1) {
+        this.state.display1.splice(index, 1)
+        this.setState({display1: this.state.display1});
+      }else{
+        index = this.state.display2.indexOf(item);
+        if (index > -1) {
+          this.state.display2.splice(index, 1)
+          this.setState({display2: this.state.display2});
+        }
+      }
+    }
+  }
+
+storePhoto(photo){
+    if(this.state.displayindex == 0){
+      this.setState({display0: this.state.display0.reverse().concat(photo).reverse()});
+      this.setState({displayindex: 1})
+    }else if(this.state.displayindex == 1){
+      this.setState({display1: this.state.display1.reverse().concat(photo).reverse()});
+      this.setState({displayindex: 2})
+    }else{
+      this.setState({display2: this.state.display2.reverse().concat(photo).reverse()});
+      this.setState({displayindex: 0})
+    }
+  }
+
 loadphotos(howmany){
   CameraRoll.getPhotos({
   first: howmany + this.state.cursor,
@@ -105,14 +164,15 @@ loadphotos(howmany){
     const media = this.state.media;
     data.edges.forEach((d, i) =>
       {if(i >= this.state.cursor && !this.state.blackphotos.includes(d.node.image.uri)){
-      media.push({
+      
+      this.storePhoto({
         photo: d.node.image.uri,
         key: d.node.image.uri,
         width: d.node.image.width,
         height: d.node.image.height,
       })}},
     );
-    this.setState({media: media, cursor: this.state.cursor + howmany});
+    this.setState({cursor: this.state.cursor + howmany});
   })
   .catch(error => alert(error));
 }
@@ -120,12 +180,13 @@ loadphotos(howmany){
 load(){
   this.loadphotos(50)
 }
+
 displayImage(item){
   return(
-    <TouchableOpacity onPress={(e) => {this.sendPicture(item);}}>
-    <Image source={{ uri: item.photo}} style={{width: Dimensions.get('window').width/3, height: (item.height/item.width)*Dimensions.get('window').width/3}}/>
-    </TouchableOpacity>
-    )
+    <ImageTile item={item} icon={"chevron-thin-up"}
+    parentSelect={this.parentSelected}
+    action={this.sendPicture}></ImageTile>
+  )
 }
 async addBlacklist(uri){
     blacklist = await AsyncStorage.getItem('blacklist');
@@ -150,17 +211,33 @@ async addBlacklist(uri){
   }
 
 
+
   render() {
-    if(this.state.media !== []){
     return(
       <Container style={styles.headcontainer}>
-       <Header style={{ paddingLeft: 10, paddingLeft: 10 }}>
-                    <Left>
-                        <Text>md-person-add</Text>
-                    </Left>
-                    <Right>
-                        <Text>md-person-add</Text>
-                    </Right>
+      {this.state.browsertutorial === true ?
+      <TouchableOpacity onPress={(e) => {this.setState({browsertutorial: false});}} style={{
+
+    width: Dimensions.get('window').width - 50,
+    height: Dimensions.get('window').height - 50,
+    top: 30,
+    left: 30,
+    backgroundColor: 'black',
+    borderRadius: 20,
+    zIndex: 2, 
+    position: "absolute",
+    opacity: .8,
+    alignItems:'center',
+    justifyContent: "center"
+  }}>
+      <Entypo name="chevron-thin-up" style={{color:'white', fontSize: 200}}/>
+      <Text style={{color:'white', fontSize: 40, textAlign: "center"}}>Tap a picture to set it free! {"\n"} It will be sent to whoever's in it</Text>
+      </TouchableOpacity>
+      : null}
+       <Header style={{ paddingLeft: 10, paddingLeft: 10, backgroundColor:'#21ce99'}}>
+          <Body style={{alignItems:'center', justifyContent: "center"}}>
+            <Entypo name="chevron-thin-up" style={{color:'white', fontSize: 30}}/>
+          </Body>
         </Header>
     <View style={styles.wrapper}>
     <ScrollView contentContainerStyle={styles.container}
@@ -170,23 +247,29 @@ async addBlacklist(uri){
       }
     }}
     scrollEventThrottle={400}>
+    {this.state.display0.length !== 0 ?
         <FlatList
-  data={this.state.media.filter((_,i) => i % 3 == 0)}
-  renderItem={({item}) => this.displayImage(item)}/>
+          data={this.state.display0}
+          renderItem={({item}) => this.displayImage(item)}/>
+      : <View style={{width: Dimensions.get('window').width/3}}/>
+    }
+        
+    {this.state.display1.length !== 0 ?
         <FlatList
-  data={this.state.media.filter((_,i) => i % 3 == 1)}
-  renderItem={({item}) =>  this.displayImage(item)}/>
+          data={this.state.display1}
+          renderItem={({item}) => this.displayImage(item)}/>
+      : <View style={{width: Dimensions.get('window').width/3}}/>
+    }
+     {this.state.display2.length !== 0 ?
         <FlatList
-  data={this.state.media.filter((_,i) => i % 3 == 2)}
-  renderItem={({item}) =>  this.displayImage(item)}
-/>
+          data={this.state.display2}
+          renderItem={({item}) => this.displayImage(item)}/>
+      : <View style={{width: Dimensions.get('window').width/3}}/>
+    }
     </ScrollView>
 </View>
 </Container>
-)}else{
-      return(
-      <View/>)
-    }
+)
 
   }
 }

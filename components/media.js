@@ -2,33 +2,51 @@ import React, {
   Component
 } from "react";
 import {View, Text, StyleSheet, CameraRoll, AsyncStorage, TouchableOpacity,
-  ImageBackground, Image, ScrollView, FlatList, Dimensions
+  ImageBackground, Image, ScrollView, FlatList, Dimensions, Animated
 } from "react-native";
 import { Camera, Permissions, Location, FileSystem, Notifications, Font} from 'expo'
-import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
+import { Entypo, Ionicons } from '@expo/vector-icons';
 import Amplify, { Storage, API } from 'aws-amplify';
 import aws_exports from './../aws-exports';
 import { Container, Content, Icon, Header, Left, Body, Right, Segment, Button } from 'native-base'
+import ImageTile from './imagetile'
 
 
 class MediaComponent extends Component{
 
 	constructor(props) {
     super(props);
-
     this.state = {
-      displayphotos: [],
       storedphotos: [],
       newPics: [],
       displayphoto: null,
-      displayindex: 1,
-    location: null,
+      location: null,
       intervalID: null,
-      fontLoaded: false
+      fontLoaded: false,
+      display0: [],
+      display1: [],
+      display2: [],
+      displayindex: 0,
+      mediatutorial: false,
+      childSelect: null
     }
 
     this.checkServer = this.checkServer.bind(this);
     }
+
+parentSelected(childSelected){
+    if(childSelected == null){
+      this.setState({childSelect: null})
+      return false
+    }else if(this.state.childSelect == null){
+      this.setState({childSelect: childSelected})
+      return true
+    }else{
+      this.state.childSelect();
+      this.setState({childSelect: null})
+      return false
+    }
+  }
 
   async componentDidMount() {
     this.getBlacklist();
@@ -38,7 +56,6 @@ class MediaComponent extends Component{
     Font.loadAsync({
       'custom-font': require('./../assets/fonts/Molluca.ttf'),
     }).then(response => {this.setState({ fontLoaded: true })});
-
 
 
 	}
@@ -74,7 +91,7 @@ class MediaComponent extends Component{
         .then(async ({ uri }) => {
           console.log('Finished downloading to ', uri);
           Image.getSize(uri, (width, height) => {
-            this.setState({displayphotos: this.state.displayphotos.reverse().concat({key: uri, width: width, height: height}).reverse()});
+            this.storePhoto(uri, width, height);
           }, (error) => {
             console.error(`Couldn't get the image size: ${error.message}`);
           });
@@ -82,6 +99,20 @@ class MediaComponent extends Component{
       }
     }
   }
+
+  storePhoto(uri, width, height){
+    if(this.state.displayindex == 0){
+      this.setState({display0: this.state.display0.reverse().concat({photo: uri, key: uri, width: width, height: height}).reverse()});
+      this.setState({displayindex: 1})
+    }else if(this.state.displayindex == 1){
+      this.setState({display1: this.state.display1.reverse().concat({photo: uri, key: uri, width: width, height: height}).reverse()});
+      this.setState({displayindex: 2})
+    }else{
+      this.setState({display2: this.state.display2.reverse().concat({photo: uri, key: uri, width: width, height: height}).reverse()});
+      this.setState({displayindex: 0})
+    }
+  }
+
   async addBlacklist(uri){
     blacklist = await AsyncStorage.getItem('blacklist');
     if(!blacklist){
@@ -104,54 +135,103 @@ class MediaComponent extends Component{
     this.setState({storedphotos: this.state.storedphotos + blacklist});
   }
 
-
+  removePhoto(item){
+    //Unelegant
+    var index = this.state.display0.indexOf(item);
+    if (index > -1) {
+      this.state.display0.splice(index, 1);
+      this.setState({display0: this.state.display0});
+    }else{
+      index = this.state.display1.indexOf(item);
+      if (index > -1) {
+        this.state.display1.splice(index, 1)
+        this.setState({display1: this.state.display1});
+      }else{
+        index = this.state.display2.indexOf(item);
+        console.log(index)
+        if (index > -1) {
+          this.state.display2.splice(index, 1)
+          this.setState({display2: this.state.display2});
+        }
+      }
+    }
+  }
 	async save(item){
 		CameraRoll.saveToCameraRoll(item.key);
     this.addBlacklist(item.key)
-    var index = this.state.displayphotos.indexOf(item);
-    list = this.state.displayphotos
-    if (index > -1) {
-      this.state.displayphotos.splice(index, 1);
-    }
-    this.setState({displayphotos: list})
-
+    
+    this.removePhoto(item);
+    
+    
 	}
+
   displayImage(item){
-    return(
-      <TouchableOpacity onPress={(e) => {this.save(item);}}>
-      <Image source={{ uri: item.key}} style={{width: Dimensions.get('window').width/3, height: (item.height/item.width)*Dimensions.get('window').width/3}}/>
-      </TouchableOpacity>
-      )
+      return(
+    <ImageTile item={item} icon={"chevron-thin-down"} 
+    parentSelected={this.parentSelected}
+    action={this.save}></ImageTile>
+  )
+      
   }
 
 	render(){
 
-
-		if(this.state.displayphotos !== []){
+		if(this.state.display0 !== []){
     return(
+      
       <Container style={styles.headcontainer}>
-       <Header style={{ paddingLeft: 10, paddingLeft: 10 }}>
+      {this.state.mediatutorial === true ?
+      <TouchableOpacity onPress={(e) => {this.setState({mediatutorial: false});}} style={{
+
+    width: Dimensions.get('window').width - 50,
+    height: Dimensions.get('window').height - 50,
+    top: 30,
+    left: 30,
+    backgroundColor: 'black',
+    borderRadius: 20,
+    zIndex: 2, 
+    position: "absolute",
+    opacity: .8,
+    alignItems:'center',
+    justifyContent: "center"
+  }}>
+      <Entypo name="chevron-thin-down" style={{color:'white', fontSize: 200}}/>
+      <Text style={{color:'white', fontSize: 40, textAlign: "center"}}>Tap a picture to download it!</Text>
+      </TouchableOpacity>
+      : null}
+       <Header style={{ paddingLeft: 10, paddingLeft: 10, backgroundColor:'#21ce99'}}>
+                    <Left></Left>
+                    <Body style={{alignItems:'center', justifyContent: "center"}}>
+                      <Entypo name="chevron-thin-down" style={{color:'white', fontSize: 30}}/>
+                    </Body>
                     <Right>
                         <TouchableOpacity onPress={(e) => {this.props.method('settings');}}>
-                          <Ionicons name="ios-more" style={{color:'black', fontSize: 30}}>
+                          <Ionicons name="ios-more" style={{color:'white', fontSize: 30}}>
                           </Ionicons>
                         </TouchableOpacity>
                     </Right>
         </Header>
     <View style={styles.wrapper}>
     <ScrollView contentContainerStyle={styles.container}>
-        <FlatList
-          data={this.state.displayphotos.filter((_,i) => i % 3 == 0)}
-          renderItem={({item}) => this.displayImage(item)}
-        />
-        <FlatList
-          data={this.state.displayphotos.filter((_,i) => i % 3 == 1)}
-          renderItem={({item}) =>  this.displayImage(item)}
-        />
-        <FlatList
-          data={this.state.displayphotos.filter((_,i) => i % 3 == 2)}
-          renderItem={({item}) => this.displayImage(item)}
-        />
+          {this.state.display0.length !== 0 ?
+              <FlatList
+                data={this.state.display0}
+                renderItem={({item}) => this.displayImage(item)}/>
+            : <View style={{width: Dimensions.get('window').width/3}}/>
+          }
+              
+          {this.state.display1.length !== 0 ?
+              <FlatList
+                data={this.state.display1}
+                renderItem={({item}) => this.displayImage(item)}/>
+            : <View style={{width: Dimensions.get('window').width/3}}/>
+          }
+           {this.state.display2.length !== 0 ?
+              <FlatList
+                data={this.state.display2}
+                renderItem={({item}) => this.displayImage(item)}/>
+            : <View style={{width: Dimensions.get('window').width/3}}/>
+          }
     </ScrollView>
 </View>
 </Container>
@@ -207,6 +287,7 @@ list: {
     textAlign: 'center',
     paddingTop: 10,}
 });
+
 
 export default MediaComponent
 
