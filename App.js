@@ -170,7 +170,7 @@ export default class App extends React.Component {
       return(<View/>);
     if(this.state.page == 'settings')
       return(<SettingPage method={this.navigate}></SettingPage>)
-    if(this.state.signUp) {
+    if(this.state.seeSignUpPage) {
       console.log('signup is true');
       return (
         <SignUpProcess signUpAuth={this.needToSignUp} homePage={this.homePage}> </SignUpProcess>
