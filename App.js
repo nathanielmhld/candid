@@ -80,7 +80,7 @@ export default class App extends React.Component {
   authenticate(isAuthenticated) {
     console.log('setting authentication to true');
     this.setState({ seeLogInPage: false, seeSignUpPage: false, isLoggedInNEW: true, isLoggedIn: isAuthenticated});
-    this.registerForPush();
+    //this.registerForPush();
   }
 
   needToSignUp(signUp) {
@@ -130,7 +130,7 @@ export default class App extends React.Component {
       this.setState({isLoggedIn: true});
       this.setState({ seeLogInPage: false, seeSignUpPage: false, isLoggedInNEW: true});
       this.setState({loaded: true});
-      this.registerForPush();
+      //this.registerForPush();
     }else{
       this.setState({loaded: true});
     }

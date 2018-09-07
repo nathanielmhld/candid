@@ -2,9 +2,9 @@ import React, {
   Component
 } from "react";
 import {View, Text, StyleSheet, CameraRoll, AsyncStorage, TouchableOpacity,
-  ImageBackground, Image, ScrollView, FlatList, Dimensions, Animated
+  ImageBackground, Image, ScrollView, FlatList, Dimensions, Animated, RefreshControl
 } from "react-native";
-import { Camera, Permissions, Location, FileSystem, Notifications, Font} from 'expo'
+import { Camera, Permissions, Location, FileSystem, Font} from 'expo'
 import { Entypo, Ionicons } from '@expo/vector-icons';
 import Amplify, { Storage, API } from 'aws-amplify';
 import aws_exports from './../aws-exports';
@@ -28,10 +28,13 @@ class MediaComponent extends Component{
       display2: [],
       displayindex: 0,
       mediatutorial: false,
+      childSelect: null,
+      refreshing: false,
       childSelect: null
     }
-
-    this.checkServer = this.checkServer.bind(this);
+    this.parentSelected = this.parentSelected.bind(this);
+    this.save = this.save.bind(this);
+    //this.checkServer = this.checkServer.bind(this);
     }
 
 parentSelected(childSelected){
@@ -48,10 +51,17 @@ parentSelected(childSelected){
     }
   }
 
+  _onRefresh = () => {
+    this.setState({refreshing: true});
+    this.checkServer().then(() => {
+      this.setState({refreshing: false});
+    });
+  }
+
   async componentDidMount() {
     this.getBlacklist();
     this.checkServer();
-    this._notificationSubscription = Notifications.addListener(this._handleNotification);
+    //this._notificationSubscription = Notifications.addListener(this._handleNotification);
     //this.setState({intervalID: window.setInterval(this.checkServer, 10000)});
     Font.loadAsync({
       'custom-font': require('./../assets/fonts/Molluca.ttf'),
@@ -60,9 +70,9 @@ parentSelected(childSelected){
 
 	}
 
-  _handleNotification = (notification) => {
-    this.checkServer();
-  };
+  //_handleNotification = (notification) => {
+  //  this.checkServer();
+  //};
 
 
 	async checkServer() {
@@ -159,7 +169,6 @@ parentSelected(childSelected){
 	async save(item){
 		CameraRoll.saveToCameraRoll(item.key);
     this.addBlacklist(item.key)
-    
     this.removePhoto(item);
     
     
@@ -168,7 +177,7 @@ parentSelected(childSelected){
   displayImage(item){
       return(
     <ImageTile item={item} icon={"chevron-thin-down"} 
-    parentSelected={this.parentSelected}
+    parentSelect={this.parentSelected}
     action={this.save}></ImageTile>
   )
       
@@ -212,7 +221,13 @@ parentSelected(childSelected){
                     </Right>
         </Header>
     <View style={styles.wrapper}>
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}
+    refreshControl={
+          <RefreshControl
+            refreshing={this.state.refreshing}
+            onRefresh={this._onRefresh}
+          />
+        }>
           {this.state.display0.length !== 0 ?
               <FlatList
                 data={this.state.display0}

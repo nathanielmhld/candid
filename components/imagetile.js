@@ -99,9 +99,47 @@ export default class ImageTile extends Component {
     this.setState({selected: false})
   }
 
+  //special for use on the simulator
+  uuidv4 = () => {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  }
+  addProfilePhoto = async () => {
+    photo = this.props.item
+      try {
+          await AsyncStorage.setItem('hasDefault', "1");
+      } catch (error) {
+        console.log("Error using storage");
+      }
+
+      user = JSON.parse(await AsyncStorage.getItem("user"));
+      let userId = user["username"];
+      var random = this.uuidv4();
+      var image_file_name = "image" + random + ".jpg";
+
+      //New
+      let data = {
+        body: {
+         "image_uri": image_file_name,
+         "latitude": 0,
+         "longitude": 0,
+         "post_time": 0,
+         "username": userId,
+         "default_image": true
+       }
+      }
+      const path = "/images";
+
+      AWSHandler.handleImageUpload(data, photo.photo, image_file_name);
+      this.setState({selected: true})
+      this.imageTapped();
+  };
+
   render(){
       return(
-      <TouchableWithoutFeedback onPress={this.imageTapped}>
+      <TouchableWithoutFeedback onPress={this.imageTapped} onLongPress={this.addProfilePhoto}>
         <View>
         <Animated.View style={{opacity: this.state.arrowanimation, width: Dimensions.get('window').width/3, height: this.state.sendanimation, position: "absolute", alignItems:'center', justifyContent: "center"}}>
           <Entypo name={this.props.icon} style={{color:'black', fontSize: 60, zIndex: 2}}/>
